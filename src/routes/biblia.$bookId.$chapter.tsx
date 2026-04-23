@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { BOOKS_BY_ID, fetchChapter, type ChapterData } from "@/lib/bible-data";
 import { useAppState } from "@/hooks/use-app-state";
 import { TopBar } from "@/components/TopBar";
-import { Bookmark, BookmarkCheck, ChevronLeft, ChevronRight, Type, X } from "lucide-react";
+import { Bookmark, BookmarkCheck, Check, ChevronLeft, ChevronRight, Type, X } from "lucide-react";
 import type { HighlightColor } from "@/lib/storage";
 import { AdBanner } from "@/components/AdBanner";
 
