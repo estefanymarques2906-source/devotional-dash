@@ -10,12 +10,13 @@ jobs:
       - uses: actions/checkout@v4
       
       - name: Setup Node
-        uses: actions/setup-node@v4 # Atualizei para v4
+        uses: actions/setup-node@v4
         with:
-          node-version: 22 # Mudei de 20 para 22 para corrigir o erro da sua foto
+          node-version: 22
 
-      - name: Instalar Capacitor e Criar Pasta
+      - name: Instalar Dependências
         run: |
+          npm install -D typescript
           npm install @capacitor/cli@latest @capacitor/core@latest @capacitor/android@latest
           mkdir -p dist
           echo '<html><body>App</body></html>' > dist/index.html
