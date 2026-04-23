@@ -135,8 +135,26 @@ function ChapterPage() {
           </article>
         )}
 
+        {/* Marcar capítulo como lido */}
+        {data && !loading && (
+          <div className="mt-10 flex justify-center">
+            <button
+              onClick={() => !isRead && markRead(book.id, ch)}
+              disabled={isRead}
+              className={`flex items-center gap-2 rounded-full px-6 py-3 text-sm font-medium transition-all ${
+                isRead
+                  ? "border border-primary/40 bg-primary/15 text-primary"
+                  : "bg-primary text-primary-foreground shadow-gold hover:scale-105"
+              }`}
+            >
+              <Check className="h-4 w-4" strokeWidth={3} />
+              {isRead ? "Capítulo lido" : "Marcar como lido"}
+            </button>
+          </div>
+        )}
+
         {/* Chapter nav */}
-        <div className="mt-10 flex items-center justify-between gap-3">
+        <div className="mt-6 flex items-center justify-between gap-3">
           {prevCh ? (
             <Link
               to="/biblia/$bookId/$chapter"
