@@ -9,38 +9,160 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as FavoritosRouteImport } from './routes/favoritos'
+import { Route as BuscarRouteImport } from './routes/buscar'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as JogosIndexRouteImport } from './routes/jogos.index'
+import { Route as BibliaIndexRouteImport } from './routes/biblia.index'
+import { Route as JogosQuizRouteImport } from './routes/jogos.quiz'
+import { Route as JogosCacapalavrasRouteImport } from './routes/jogos.cacapalavras'
+import { Route as BibliaBookIdIndexRouteImport } from './routes/biblia.$bookId.index'
+import { Route as BibliaBookIdChapterRouteImport } from './routes/biblia.$bookId.$chapter'
 
+const FavoritosRoute = FavoritosRouteImport.update({
+  id: '/favoritos',
+  path: '/favoritos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BuscarRoute = BuscarRouteImport.update({
+  id: '/buscar',
+  path: '/buscar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const JogosIndexRoute = JogosIndexRouteImport.update({
+  id: '/jogos/',
+  path: '/jogos/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BibliaIndexRoute = BibliaIndexRouteImport.update({
+  id: '/biblia/',
+  path: '/biblia/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JogosQuizRoute = JogosQuizRouteImport.update({
+  id: '/jogos/quiz',
+  path: '/jogos/quiz',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JogosCacapalavrasRoute = JogosCacapalavrasRouteImport.update({
+  id: '/jogos/cacapalavras',
+  path: '/jogos/cacapalavras',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BibliaBookIdIndexRoute = BibliaBookIdIndexRouteImport.update({
+  id: '/biblia/$bookId/',
+  path: '/biblia/$bookId/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BibliaBookIdChapterRoute = BibliaBookIdChapterRouteImport.update({
+  id: '/biblia/$bookId/$chapter',
+  path: '/biblia/$bookId/$chapter',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/buscar': typeof BuscarRoute
+  '/favoritos': typeof FavoritosRoute
+  '/jogos/cacapalavras': typeof JogosCacapalavrasRoute
+  '/jogos/quiz': typeof JogosQuizRoute
+  '/biblia/': typeof BibliaIndexRoute
+  '/jogos/': typeof JogosIndexRoute
+  '/biblia/$bookId/$chapter': typeof BibliaBookIdChapterRoute
+  '/biblia/$bookId/': typeof BibliaBookIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/buscar': typeof BuscarRoute
+  '/favoritos': typeof FavoritosRoute
+  '/jogos/cacapalavras': typeof JogosCacapalavrasRoute
+  '/jogos/quiz': typeof JogosQuizRoute
+  '/biblia': typeof BibliaIndexRoute
+  '/jogos': typeof JogosIndexRoute
+  '/biblia/$bookId/$chapter': typeof BibliaBookIdChapterRoute
+  '/biblia/$bookId': typeof BibliaBookIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/buscar': typeof BuscarRoute
+  '/favoritos': typeof FavoritosRoute
+  '/jogos/cacapalavras': typeof JogosCacapalavrasRoute
+  '/jogos/quiz': typeof JogosQuizRoute
+  '/biblia/': typeof BibliaIndexRoute
+  '/jogos/': typeof JogosIndexRoute
+  '/biblia/$bookId/$chapter': typeof BibliaBookIdChapterRoute
+  '/biblia/$bookId/': typeof BibliaBookIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/buscar'
+    | '/favoritos'
+    | '/jogos/cacapalavras'
+    | '/jogos/quiz'
+    | '/biblia/'
+    | '/jogos/'
+    | '/biblia/$bookId/$chapter'
+    | '/biblia/$bookId/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/buscar'
+    | '/favoritos'
+    | '/jogos/cacapalavras'
+    | '/jogos/quiz'
+    | '/biblia'
+    | '/jogos'
+    | '/biblia/$bookId/$chapter'
+    | '/biblia/$bookId'
+  id:
+    | '__root__'
+    | '/'
+    | '/buscar'
+    | '/favoritos'
+    | '/jogos/cacapalavras'
+    | '/jogos/quiz'
+    | '/biblia/'
+    | '/jogos/'
+    | '/biblia/$bookId/$chapter'
+    | '/biblia/$bookId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BuscarRoute: typeof BuscarRoute
+  FavoritosRoute: typeof FavoritosRoute
+  JogosCacapalavrasRoute: typeof JogosCacapalavrasRoute
+  JogosQuizRoute: typeof JogosQuizRoute
+  BibliaIndexRoute: typeof BibliaIndexRoute
+  JogosIndexRoute: typeof JogosIndexRoute
+  BibliaBookIdChapterRoute: typeof BibliaBookIdChapterRoute
+  BibliaBookIdIndexRoute: typeof BibliaBookIdIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/favoritos': {
+      id: '/favoritos'
+      path: '/favoritos'
+      fullPath: '/favoritos'
+      preLoaderRoute: typeof FavoritosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/buscar': {
+      id: '/buscar'
+      path: '/buscar'
+      fullPath: '/buscar'
+      preLoaderRoute: typeof BuscarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,12 +170,71 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/jogos/': {
+      id: '/jogos/'
+      path: '/jogos'
+      fullPath: '/jogos/'
+      preLoaderRoute: typeof JogosIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/biblia/': {
+      id: '/biblia/'
+      path: '/biblia'
+      fullPath: '/biblia/'
+      preLoaderRoute: typeof BibliaIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/jogos/quiz': {
+      id: '/jogos/quiz'
+      path: '/jogos/quiz'
+      fullPath: '/jogos/quiz'
+      preLoaderRoute: typeof JogosQuizRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/jogos/cacapalavras': {
+      id: '/jogos/cacapalavras'
+      path: '/jogos/cacapalavras'
+      fullPath: '/jogos/cacapalavras'
+      preLoaderRoute: typeof JogosCacapalavrasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/biblia/$bookId/': {
+      id: '/biblia/$bookId/'
+      path: '/biblia/$bookId'
+      fullPath: '/biblia/$bookId/'
+      preLoaderRoute: typeof BibliaBookIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/biblia/$bookId/$chapter': {
+      id: '/biblia/$bookId/$chapter'
+      path: '/biblia/$bookId/$chapter'
+      fullPath: '/biblia/$bookId/$chapter'
+      preLoaderRoute: typeof BibliaBookIdChapterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BuscarRoute: BuscarRoute,
+  FavoritosRoute: FavoritosRoute,
+  JogosCacapalavrasRoute: JogosCacapalavrasRoute,
+  JogosQuizRoute: JogosQuizRoute,
+  BibliaIndexRoute: BibliaIndexRoute,
+  JogosIndexRoute: JogosIndexRoute,
+  BibliaBookIdChapterRoute: BibliaBookIdChapterRoute,
+  BibliaBookIdIndexRoute: BibliaBookIdIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
