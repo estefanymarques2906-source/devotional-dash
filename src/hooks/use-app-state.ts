@@ -58,5 +58,5 @@ export function useAppState() {
   const toggleTheme = useCallback(() => setState((s) => ({ ...s, theme: s.theme === "dark" ? "light" : "dark" })), []);
   const addQuizScore = useCallback((n: number) => setState((s) => ({ ...s, quizScore: s.quizScore + n })), []);
 
-  return { state, markRead, toggleBookmark, setHighlight, setFontSize, toggleTheme, addQuizScore };
+  return { state, markRead, toggleRead, toggleBookmark, setHighlight, setFontSize, toggleTheme, addQuizScore };
 }
