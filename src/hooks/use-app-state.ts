@@ -20,6 +20,16 @@ export function useAppState() {
     });
   }, []);
 
+  const toggleRead = useCallback((bookId: string, chapter: number) => {
+    setState((s) => {
+      const key = `${bookId}-${chapter}`;
+      if (s.readChapters.includes(key)) {
+        return { ...s, readChapters: s.readChapters.filter((k) => k !== key) };
+      }
+      return bumpStreak({ ...s, readChapters: [...s.readChapters, key], lastRead: { bookId, chapter } });
+    });
+  }, []);
+
   const toggleBookmark = useCallback((b: Bookmark) => {
     setState((s) => {
       const exists = s.bookmarks.some(
@@ -48,5 +58,5 @@ export function useAppState() {
   const toggleTheme = useCallback(() => setState((s) => ({ ...s, theme: s.theme === "dark" ? "light" : "dark" })), []);
   const addQuizScore = useCallback((n: number) => setState((s) => ({ ...s, quizScore: s.quizScore + n })), []);
 
-  return { state, markRead, toggleBookmark, setHighlight, setFontSize, toggleTheme, addQuizScore };
+  return { state, markRead, toggleRead, toggleBookmark, setHighlight, setFontSize, toggleTheme, addQuizScore };
 }

@@ -30,7 +30,7 @@ const COLORS: { id: HighlightColor; cls: string; label: string }[] = [
 
 function ChapterPage() {
   const { book, ch } = Route.useLoaderData();
-  const { state, markRead, toggleBookmark, setHighlight, setFontSize } = useAppState();
+  const { state, toggleRead, toggleBookmark, setHighlight, setFontSize } = useAppState();
   const [data, setData] = useState<ChapterData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -139,16 +139,15 @@ function ChapterPage() {
         {data && !loading && (
           <div className="mt-10 flex justify-center">
             <button
-              onClick={() => !isRead && markRead(book.id, ch)}
-              disabled={isRead}
-              className={`flex items-center gap-2 rounded-full px-6 py-3 text-sm font-medium transition-all ${
+              onClick={() => toggleRead(book.id, ch)}
+              className={`flex items-center gap-2 rounded-full px-6 py-3 text-sm font-medium transition-all hover:scale-105 ${
                 isRead
                   ? "border border-primary/40 bg-primary/15 text-primary"
-                  : "bg-primary text-primary-foreground shadow-gold hover:scale-105"
+                  : "bg-primary text-primary-foreground shadow-gold"
               }`}
             >
               <Check className="h-4 w-4" strokeWidth={3} />
-              {isRead ? "Capítulo lido" : "Marcar como lido"}
+              {isRead ? "Capítulo lido — desmarcar" : "Marcar como lido"}
             </button>
           </div>
         )}
