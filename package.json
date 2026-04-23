@@ -1,5 +1,6 @@
 {
   "name": "meu-app",
+  "private": true,
   "type": "module",
   "scripts": {
     "build": "vite build",
@@ -7,10 +8,13 @@
   },
   "dependencies": {
     "@capacitor/android": "latest",
-    "@capacitor/core": "latest"
+    "@capacitor/core": "latest",
+    "react": "latest",
+    "react-dom": "latest"
   },
   "devDependencies": {
     "@capacitor/cli": "latest",
-    "vite": "latest"
+    "vite": "latest",
+    "@vitejs/plugin-react": "latest"
   }
 }
