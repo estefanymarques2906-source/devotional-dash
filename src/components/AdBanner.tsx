@@ -32,12 +32,11 @@ let nativeBannerShown = false;
 async function tryShowNativeBanner(): Promise<boolean> {
   try {
     // Import dinâmico para não quebrar o build web caso o pacote não esteja instalado
-    const mod = await import(
-      /* @vite-ignore */ "@capacitor-community/admob"
-    ).catch(() => null);
+    const pkg = "@capacitor-community/admob";
+    const mod: any = await import(/* @vite-ignore */ pkg).catch(() => null);
     if (!mod) return false;
 
-    const { AdMob, BannerAdPosition, BannerAdSize } = mod as any;
+    const { AdMob, BannerAdPosition, BannerAdSize } = mod;
 
     if (!nativeBannerShown) {
       await AdMob.initialize({
