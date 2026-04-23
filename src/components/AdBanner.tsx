@@ -24,7 +24,7 @@ import { useEffect, useRef, useState } from "react";
 export const ADMOB_APP_ID = "ca-app-pub-7898169843659717~1871877683";
 export const ADMOB_BANNER_ID = "ca-app-pub-7898169843659717/4198658128";
 
-const BANNER_HEIGHT = 100; // dp — formato LARGE_BANNER (320x100)
+const BANNER_HEIGHT = 250; // dp — formato MEDIUM_RECTANGLE (300x250)
 
 // Mantém estado global para evitar recarregar excessivamente entre re-renders
 let nativeBannerShown = false;
@@ -46,7 +46,7 @@ async function tryShowNativeBanner(): Promise<boolean> {
 
     await AdMob.showBanner({
       adId: ADMOB_BANNER_ID,
-      adSize: BannerAdSize.LARGE_BANNER, // 320x100
+      adSize: BannerAdSize.MEDIUM_RECTANGLE, // 300x250
       position: BannerAdPosition.BOTTOM_CENTER,
       margin: 64, // espaço acima do BottomNav (~64px)
       isTesting: false,
@@ -126,7 +126,7 @@ export function AdBanner() {
           className="flex items-center justify-center rounded-2xl border border-border/60 bg-muted/40 px-4 py-6 text-sm text-muted-foreground"
         >
           <span className="opacity-70">
-            Banner AdMob (320×100) será exibido aqui no aplicativo
+            Banner AdMob (300×250) será exibido aqui no aplicativo
           </span>
         </div>
       </div>
