@@ -114,19 +114,19 @@ export function AdBanner() {
     <div
       role="complementary"
       aria-label="Espaço publicitário"
-      className="mx-auto mt-8 w-full max-w-2xl select-none"
+      className="mx-auto mt-10 w-full max-w-2xl select-none"
     >
-      <div className="mx-4 border-t border-border/60 pt-3">
-        <p className="mb-1 text-center text-[10px] uppercase tracking-widest text-muted-foreground/70">
+      <div className="mx-4 border-t border-border/60 pt-4">
+        <p className="mb-2 text-center text-[10px] uppercase tracking-widest text-muted-foreground/70">
           Publicidade
         </p>
         <div
           onError={() => setFailed(true)}
           style={{ minHeight: BANNER_HEIGHT }}
-          className="flex items-center justify-center rounded-xl border border-border/60 bg-muted/40 px-4 py-3 text-xs text-muted-foreground"
+          className="flex items-center justify-center rounded-2xl border border-border/60 bg-muted/40 px-4 py-6 text-sm text-muted-foreground"
         >
           <span className="opacity-70">
-            Banner AdMob será exibido aqui no aplicativo
+            Banner AdMob (320×100) será exibido aqui no aplicativo
           </span>
         </div>
       </div>
