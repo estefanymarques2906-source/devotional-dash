@@ -46,7 +46,7 @@ async function tryShowNativeBanner(): Promise<boolean> {
 
     await AdMob.showBanner({
       adId: ADMOB_BANNER_ID,
-      adSize: BannerAdSize.LARGE_BANNER, // 320x100
+      adSize: BannerAdSize.MEDIUM_RECTANGLE, // 300x250
       position: BannerAdPosition.BOTTOM_CENTER,
       margin: 64, // espaço acima do BottomNav (~64px)
       isTesting: false,
