@@ -62,12 +62,10 @@ async function tryShowNativeBanner(): Promise<boolean> {
 
 async function hideNativeBanner() {
   try {
-    const mod = await import(
-      /* @vite-ignore */ "@capacitor-community/admob"
-    ).catch(() => null);
+    const pkg = "@capacitor-community/admob";
+    const mod: any = await import(/* @vite-ignore */ pkg).catch(() => null);
     if (!mod) return;
-    const { AdMob } = mod as any;
-    await AdMob.hideBanner();
+    await mod.AdMob.hideBanner();
     nativeBannerShown = false;
   } catch {
     /* noop */
