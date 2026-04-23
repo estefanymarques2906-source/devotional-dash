@@ -52,8 +52,6 @@ function RootComponent() {
     <div className="min-h-screen bg-background pb-20">
       <Outlet />
       <BottomNav />
-      {/* AdMob banner placeholder — substitua quando empacotar com Capacitor */}
-      <div id="admob-banner-slot" />
     </div>
   );
 }
