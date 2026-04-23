@@ -1,0 +1,38 @@
+name: Gerar APK Capacitor
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          
+      - name: Instalar Dependencias
+        run: npm install
+        
+      - name: Build do Projeto Web
+        run: npm run build
+        
+      - name: Instalar Android Platform
+        run: |
+          npm install @capacitor/android
+          npx cap add android
+          npx cap copy android
+          
+      - name: Gerar APK
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: meu-app-final
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          
