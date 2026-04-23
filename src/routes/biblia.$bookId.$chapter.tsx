@@ -47,7 +47,6 @@ function ChapterPage() {
         if (cancel) return;
         setData(d);
         setLoading(false);
-        markRead(book.id, ch);
       })
       .catch((e) => {
         if (cancel) return;
@@ -55,7 +54,9 @@ function ChapterPage() {
         setLoading(false);
       });
     return () => { cancel = true; };
-  }, [book.id, ch, markRead]);
+  }, [book.id, ch]);
+
+  const isRead = state.readChapters.includes(`${book.id}-${ch}`);
 
   const prevCh = ch > 1 ? ch - 1 : null;
   const nextCh = ch < book.chapters ? ch + 1 : null;
