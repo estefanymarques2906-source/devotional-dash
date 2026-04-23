@@ -24,7 +24,7 @@ import { useEffect, useRef, useState } from "react";
 export const ADMOB_APP_ID = "ca-app-pub-7898169843659717~1871877683";
 export const ADMOB_BANNER_ID = "ca-app-pub-7898169843659717/4198658128";
 
-const BANNER_HEIGHT = 50; // dp (banner padrão AdMob)
+const BANNER_HEIGHT = 100; // dp — formato LARGE_BANNER (320x100)
 
 // Mantém estado global para evitar recarregar excessivamente entre re-renders
 let nativeBannerShown = false;
@@ -46,7 +46,7 @@ async function tryShowNativeBanner(): Promise<boolean> {
 
     await AdMob.showBanner({
       adId: ADMOB_BANNER_ID,
-      adSize: BannerAdSize.ADAPTIVE_BANNER,
+      adSize: BannerAdSize.LARGE_BANNER, // 320x100
       position: BannerAdPosition.BOTTOM_CENTER,
       margin: 64, // espaço acima do BottomNav (~64px)
       isTesting: false,
@@ -114,19 +114,19 @@ export function AdBanner() {
     <div
       role="complementary"
       aria-label="Espaço publicitário"
-      className="mx-auto mt-8 w-full max-w-2xl select-none"
+      className="mx-auto mt-10 w-full max-w-2xl select-none"
     >
-      <div className="mx-4 border-t border-border/60 pt-3">
-        <p className="mb-1 text-center text-[10px] uppercase tracking-widest text-muted-foreground/70">
+      <div className="mx-4 border-t border-border/60 pt-4">
+        <p className="mb-2 text-center text-[10px] uppercase tracking-widest text-muted-foreground/70">
           Publicidade
         </p>
         <div
           onError={() => setFailed(true)}
           style={{ minHeight: BANNER_HEIGHT }}
-          className="flex items-center justify-center rounded-xl border border-border/60 bg-muted/40 px-4 py-3 text-xs text-muted-foreground"
+          className="flex items-center justify-center rounded-2xl border border-border/60 bg-muted/40 px-4 py-6 text-sm text-muted-foreground"
         >
           <span className="opacity-70">
-            Banner AdMob será exibido aqui no aplicativo
+            Banner AdMob (320×100) será exibido aqui no aplicativo
           </span>
         </div>
       </div>
