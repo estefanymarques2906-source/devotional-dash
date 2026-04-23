@@ -155,6 +155,9 @@ function ChapterPage() {
             </Link>
           ) : <span />}
         </div>
+
+        {/* AdMob banner — após o conteúdo, separado visualmente */}
+        {data && !loading && <AdBanner />}
       </main>
 
       {/* Verse action sheet */}
