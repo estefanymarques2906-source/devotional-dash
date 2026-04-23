@@ -24,7 +24,7 @@ import { useEffect, useRef, useState } from "react";
 export const ADMOB_APP_ID = "ca-app-pub-7898169843659717~1871877683";
 export const ADMOB_BANNER_ID = "ca-app-pub-7898169843659717/4198658128";
 
-const BANNER_HEIGHT = 100; // dp — formato LARGE_BANNER (320x100)
+const BANNER_HEIGHT = 250; // dp — formato MEDIUM_RECTANGLE (300x250)
 
 // Mantém estado global para evitar recarregar excessivamente entre re-renders
 let nativeBannerShown = false;
