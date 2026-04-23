@@ -30,7 +30,7 @@ const COLORS: { id: HighlightColor; cls: string; label: string }[] = [
 
 function ChapterPage() {
   const { book, ch } = Route.useLoaderData();
-  const { state, markRead, toggleBookmark, setHighlight, setFontSize } = useAppState();
+  const { state, toggleRead, toggleBookmark, setHighlight, setFontSize } = useAppState();
   const [data, setData] = useState<ChapterData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
