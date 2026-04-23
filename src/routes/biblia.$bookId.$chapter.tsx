@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { BOOKS_BY_ID, fetchChapter, type ChapterData } from "@/lib/bible-data";
 import { useAppState } from "@/hooks/use-app-state";
 import { TopBar } from "@/components/TopBar";
-import { Bookmark, BookmarkCheck, ChevronLeft, ChevronRight, Type, X } from "lucide-react";
+import { Bookmark, BookmarkCheck, Check, ChevronLeft, ChevronRight, Type, X } from "lucide-react";
 import type { HighlightColor } from "@/lib/storage";
 import { AdBanner } from "@/components/AdBanner";
 
@@ -47,7 +47,6 @@ function ChapterPage() {
         if (cancel) return;
         setData(d);
         setLoading(false);
-        markRead(book.id, ch);
       })
       .catch((e) => {
         if (cancel) return;
@@ -55,7 +54,9 @@ function ChapterPage() {
         setLoading(false);
       });
     return () => { cancel = true; };
-  }, [book.id, ch, markRead]);
+  }, [book.id, ch]);
+
+  const isRead = state.readChapters.includes(`${book.id}-${ch}`);
 
   const prevCh = ch > 1 ? ch - 1 : null;
   const nextCh = ch < book.chapters ? ch + 1 : null;
@@ -134,8 +135,26 @@ function ChapterPage() {
           </article>
         )}
 
+        {/* Marcar capítulo como lido */}
+        {data && !loading && (
+          <div className="mt-10 flex justify-center">
+            <button
+              onClick={() => !isRead && markRead(book.id, ch)}
+              disabled={isRead}
+              className={`flex items-center gap-2 rounded-full px-6 py-3 text-sm font-medium transition-all ${
+                isRead
+                  ? "border border-primary/40 bg-primary/15 text-primary"
+                  : "bg-primary text-primary-foreground shadow-gold hover:scale-105"
+              }`}
+            >
+              <Check className="h-4 w-4" strokeWidth={3} />
+              {isRead ? "Capítulo lido" : "Marcar como lido"}
+            </button>
+          </div>
+        )}
+
         {/* Chapter nav */}
-        <div className="mt-10 flex items-center justify-between gap-3">
+        <div className="mt-6 flex items-center justify-between gap-3">
           {prevCh ? (
             <Link
               to="/biblia/$bookId/$chapter"
