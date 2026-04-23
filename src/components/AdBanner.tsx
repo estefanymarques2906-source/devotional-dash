@@ -126,7 +126,7 @@ export function AdBanner() {
           className="flex items-center justify-center rounded-2xl border border-border/60 bg-muted/40 px-4 py-6 text-sm text-muted-foreground"
         >
           <span className="opacity-70">
-            Banner AdMob (320×100) será exibido aqui no aplicativo
+            Banner AdMob (300×250) será exibido aqui no aplicativo
           </span>
         </div>
       </div>
