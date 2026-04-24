@@ -1,4 +1,4 @@
-name: Build APK
+name: Build APK Final
 on:
   push:
     branches: [ "main" ]
@@ -8,19 +8,36 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+
+      - name: Setup Node e Java
+        uses: actions/setup-node@v4
         with:
-          node-version: 22 # ATUALIZADO PARA 22
+          node-version: 22
       - uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Build APK
+      - name: Limpeza e Correção de Pastas
         run: |
+          # 1. Remove qualquer rastro de pastas antigas que dão erro
+          rm -rf devotional-dash
+          
+          # 2. Instala as dependências forçando a barra
           npm install --force
+          
+          # 3. Garante que o Capacitor saiba que os arquivos estão na raiz
+          npx cap build android --packagemanager npm
+
+      - name: Sincronização Nativa
+        run: |
+          # 4. Atualiza os plugins e copia o index.html e a foto
           npx cap update
           npx cap copy android
+
+      - name: Gerar APK
+        run: |
+          # 5. Entra na pasta android real e compila
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
