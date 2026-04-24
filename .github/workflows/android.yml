@@ -9,34 +9,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node e Java
-        uses: actions/setup-node@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
         with:
-          node-version: 22
-      - uses: actions/setup-java@v4
-        with:
-          java-version: '21'
+          java-version: '17'
           distribution: 'temurin'
 
-      - name: Instalar Ferramentas de Luxo
+      - name: Preparar Arquivos
         run: |
-          # Instala o Bun (que seu projeto usa) e o TypeScript
-          curl -fsSL https://bun.sh | bash
-          export PATH="$HOME/.bun/bin:$PATH"
-          npm install -g typescript
-          
-          # Instala TODAS as peças do projeto
-          npm install
-
-      - name: Construir o App (Build)
-        run: |
-          # Transforma o código TypeScript/Vite em arquivos que o celular entende
-          npm run build || (mkdir -p dist && cp index.html dist/)
-
-      - name: Sincronizar com Android
-        run: |
-          # Avisa o Capacitor que o carro está pronto
-          npx cap sync android
+          # Isso limpa a bagunça e foca no seu index e na sua foto
+          mkdir -p android/app/src/main/assets/public
+          cp index.html android/app/src/main/assets/public/index.html
+          cp icon.png android/app/src/main/assets/public/icon.png || true
 
       - name: Compilar APK
         run: |
