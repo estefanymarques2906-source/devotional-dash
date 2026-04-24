@@ -8,30 +8,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node e Java
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
       - uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Instalar Bun e Dependencias
-        uses: oven-sh/setup-bun@v1
-      - run: |
-          bun install
-          bun install -D vite @vitejs/plugin-react typescript
-
-      - name: Build do Código (O segredo)
+      - name: Preparar Pastas
         run: |
-          bun run build || (mkdir -p dist && cp src/index.html dist/index.html || echo '<html><body>Verifique seu arquivo principal</body></html>' > dist/index.html)
+          mkdir -p dist
+          cp index.html dist/
+          cp icon.png dist/ || true
 
-      - name: Sincronizar Capacitor
+      - name: Instalar Capacitor
         run: |
-          bun x cap add android || true
-          bun x cap copy android
+          npm install @capacitor/core @capacitor/cli @capacitor/android
+          npx cap add android || true
+          npx cap copy android
 
       - name: Gerar APK Final
         run: |
