@@ -1,4 +1,4 @@
-name: Build Project
+name: Build
 
 on:
   workflow_dispatch:
@@ -15,14 +15,8 @@ jobs:
           node-version: 18
 
       - run: npm install
-
-      # 🔥 SÓ BUILD (SEM CAPACITOR)
       - run: npm run build
 
-      # 🔍 VER SE CRIOU DIST
-      - run: ls -la
-
-      # 📦 SALVAR DIST
       - uses: actions/upload-artifact@v4
         with:
           name: dist
