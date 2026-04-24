@@ -12,22 +12,31 @@ jobs:
       - name: Setup Node e Java
         uses: actions/setup-node@v4
         with:
-          node-version: 22 # MUDAMOS PARA 22 AQUI
+          node-version: 22
       - uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Preparar Pastas
+      - name: Limpeza e Preparação
         run: |
+          # Remove arquivos que podem causar conflito no celular
+          rm -rf devotional-dash
           mkdir -p dist
-          cp index.html dist/
-          cp icon.png dist/ || true
+          # Garante que seus arquivos principais vão para a pasta de build
+          cp index.html dist/index.html
+          cp icon.png dist/icon.png || echo "Aviso: icon.png não encontrado, mas continuando..."
 
-      - name: Instalar Capacitor
+      - name: Instalação Completa (Sem Erros)
         run: |
+          npm install -g typescript
           npm install @capacitor/core @capacitor/cli @capacitor/android
+          # O comando abaixo ignora erros de configuração prévia
           npx cap add android || true
+          
+      - name: Sincronização Forçada
+        run: |
+          # Força o Capacitor a ler o seu index.html novo
           npx cap copy android
 
       - name: Gerar APK Final
