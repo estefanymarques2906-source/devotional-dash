@@ -18,26 +18,21 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Limpeza e Correção de Pastas
+      - name: Preparar App
         run: |
-          # 1. Remove qualquer rastro de pastas antigas que dão erro
-          rm -rf devotional-dash
+          # 1. Instala apenas o essencial para não dar erro de opção
+          npm install @capacitor/core @capacitor/cli @capacitor/android --force
           
-          # 2. Instala as dependências forçando a barra
-          npm install --force
+          # 2. Cria a pasta que o app precisa e copia seus arquivos
+          mkdir -p www
+          cp index.html www/index.html
+          cp icon.png www/icon.png || true
           
-          # 3. Garante que o Capacitor saiba que os arquivos estão na raiz
-          npx cap build android --packagemanager npm
-
-      - name: Sincronização Nativa
-        run: |
-          # 4. Atualiza os plugins e copia o index.html e a foto
-          npx cap update
-          npx cap copy android
+          # 3. Sincroniza sem tentar fazer builds complicados
+          npx cap sync android
 
       - name: Gerar APK
         run: |
-          # 5. Entra na pasta android real e compila
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
