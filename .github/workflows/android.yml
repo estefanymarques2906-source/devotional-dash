@@ -18,28 +18,27 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Limpeza e Preparação
+      - name: Instalar Ferramentas de Luxo
         run: |
-          # Remove arquivos que podem causar conflito no celular
-          rm -rf devotional-dash
-          mkdir -p dist
-          # Garante que seus arquivos principais vão para a pasta de build
-          cp index.html dist/index.html
-          cp icon.png dist/icon.png || echo "Aviso: icon.png não encontrado, mas continuando..."
-
-      - name: Instalação Completa (Sem Erros)
-        run: |
+          # Instala o Bun (que seu projeto usa) e o TypeScript
+          curl -fsSL https://bun.sh | bash
+          export PATH="$HOME/.bun/bin:$PATH"
           npm install -g typescript
-          npm install @capacitor/core @capacitor/cli @capacitor/android
-          # O comando abaixo ignora erros de configuração prévia
-          npx cap add android || true
           
-      - name: Sincronização Forçada
-        run: |
-          # Força o Capacitor a ler o seu index.html novo
-          npx cap copy android
+          # Instala TODAS as peças do projeto
+          npm install
 
-      - name: Gerar APK Final
+      - name: Construir o App (Build)
+        run: |
+          # Transforma o código TypeScript/Vite em arquivos que o celular entende
+          npm run build || (mkdir -p dist && cp index.html dist/)
+
+      - name: Sincronizar com Android
+        run: |
+          # Avisa o Capacitor que o carro está pronto
+          npx cap sync android
+
+      - name: Compilar APK
         run: |
           cd android
           chmod +x gradlew
