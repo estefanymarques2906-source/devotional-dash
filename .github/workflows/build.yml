@@ -16,13 +16,13 @@ jobs:
 
       - run: npm install
 
-      # 🔥 GERA O DIST
+      # 🔥 SÓ BUILD (SEM CAPACITOR)
       - run: npm run build
 
-      # 🔥 GARANTE QUE EXISTE
+      # 🔍 VER SE CRIOU DIST
       - run: ls -la
 
-      # 📦 SALVA O DIST
+      # 📦 SALVAR DIST
       - uses: actions/upload-artifact@v4
         with:
           name: dist
