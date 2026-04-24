@@ -15,8 +15,14 @@ jobs:
           node-version: 18
 
       - run: npm install
+
+      # 🔥 GERA O DIST
       - run: npm run build
 
+      # 🔥 GARANTE QUE EXISTE
+      - run: ls -la
+
+      # 📦 SALVA O DIST
       - uses: actions/upload-artifact@v4
         with:
           name: dist
