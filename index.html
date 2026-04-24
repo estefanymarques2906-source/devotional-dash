@@ -4,35 +4,82 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Corrida Devocional</title>
-    <!-- Bibliotecas para o React funcionar direto no navegador -->
+    <!-- Bibliotecas para o React funcionar no celular -->
     <script src="https://unpkg.com"></script>
     <script src="https://unpkg.com"></script>
-    <!-- Babel para traduzir o código na hora -->
     <script src="https://unpkg.com"></script>
     <style>
-        body { font-family: sans-serif; display: flex; justify-content: center; padding: 20px; }
-        .card { border: 1px solid #ccc; padding: 20px; border-radius: 8px; shadow: 2px 2px 5px rgba(0,0,0,0.1); }
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card {
+            background: white;
+            padding: 40px 20px;
+            border-radius: 30px;
+            text-align: center;
+            width: 85%;
+            max-width: 350px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        }
+        .logo {
+            width: 130px;
+            height: 130px;
+            border-radius: 25px;
+            margin-bottom: 20px;
+            object-fit: cover;
+            border: 4px solid #f0f0f0;
+        }
+        h1 { color: #4a3475; font-size: 24px; margin: 0 0 10px 0; }
+        p { color: #666; font-size: 16px; line-height: 1.5; margin-bottom: 25px; }
+        .btn {
+            background: #764ba2;
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 15px;
+            width: 100%;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(118, 75, 162, 0.3);
+        }
     </style>
 </head>
 <body>
     <div id="root"></div>
 
     <script type="text/babel">
-        // Este é o seu componente principal (substitua o conteúdo do return pelo seu)
         function App() {
+            // Caminho direto para o seu arquivo na raiz
+            const caminhoDaImagem = "icon.png"; 
+
             return (
                 <div className="card">
+                    <img 
+                        src={caminhoDaImagem} 
+                        alt="Logo" 
+                        className="logo"
+                        onError={(e) => {
+                            e.target.src = "https://placeholder.com";
+                        }}
+                    />
                     <h1>Corrida Devocional</h1>
-                    <p>Seu app está online!</p>
-                    <button onClick={() => alert('Bons estudos!')}>Começar</button>
+                    <p>Sua jornada diária de fé e crescimento espiritual começa agora.</p>
+                    <button className="btn" onClick={() => alert('Bem-vindo à sua Corrida Devocional!')}>
+                        ENTRAR AGORA
+                    </button>
                 </div>
             );
         }
 
-        // Renderiza o app na tela
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
 </body>
 </html>
-
