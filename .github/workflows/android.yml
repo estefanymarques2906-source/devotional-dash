@@ -12,7 +12,7 @@ jobs:
       - name: Setup Node e Java
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22 # MUDAMOS PARA 22 AQUI
       - uses: actions/setup-java@v4
         with:
           java-version: '21'
