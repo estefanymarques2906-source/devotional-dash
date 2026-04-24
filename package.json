@@ -8,13 +8,16 @@
   },
   "dependencies": {
     "@capacitor/android": "latest",
-    "@capacitor/core": "latest",
-    "react": "latest",
-    "react-dom": "latest"
+    "@capacitor/core": "^8.3.1",
+    "build": "^0.1.4",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "run": "^1.5.0",
+    "typescript": "^6.0.3"
   },
   "devDependencies": {
-    "@capacitor/cli": "latest",
-    "vite": "latest",
-    "@vitejs/plugin-react": "latest"
+    "@capacitor/cli": "^8.3.1",
+    "@vitejs/plugin-react": "^6.0.1",
+    "vite": "^8.0.10"
   }
 }
