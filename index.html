@@ -1,13 +1,38 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Corrida Devocional</title>
-  </head>
-  <body>
+    <!-- Bibliotecas para o React funcionar direto no navegador -->
+    <script src="https://unpkg.com"></script>
+    <script src="https://unpkg.com"></script>
+    <!-- Babel para traduzir o código na hora -->
+    <script src="https://unpkg.com"></script>
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; padding: 20px; }
+        .card { border: 1px solid #ccc; padding: 20px; border-radius: 8px; shadow: 2px 2px 5px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
     <div id="root"></div>
-    <!-- Isso aqui liga o seu código ao APK -->
-    <script type="module" src="/src/App.tsx"></script>
-  </body>
+
+    <script type="text/babel">
+        // Este é o seu componente principal (substitua o conteúdo do return pelo seu)
+        function App() {
+            return (
+                <div className="card">
+                    <h1>Corrida Devocional</h1>
+                    <p>Seu app está online!</p>
+                    <button onClick={() => alert('Bons estudos!')}>Começar</button>
+                </div>
+            );
+        }
+
+        // Renderiza o app na tela
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
 </html>
+
