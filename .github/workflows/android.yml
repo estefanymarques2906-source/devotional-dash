@@ -10,46 +10,44 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Baixar código
+        uses: actions/checkout@v3
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - name: Instalar Node
+        uses: actions/setup-node@v3
         with:
-          node-version: 20
+          node-version: 18
 
-      - name: Install deps
+      - name: Instalar dependências
         run: npm install
 
-      - name: Build
-        run: npm run build || true
+      - name: Build do site
+        run: npm run build
 
-      - name: Corrigir estrutura
-        run: |
-          mkdir -p dist/client
-          if [ -f dist/index.html ]; then
-            cp dist/index.html dist/client/
-          fi
-
-      - name: Install Capacitor
+      # instala capacitor
+      - name: Instalar Capacitor
         run: npm install @capacitor/core @capacitor/cli @capacitor/android
 
+      # REMOVE config antigo (resolve seu erro)
+      - name: Remover config antigo
+        run: rm -f capacitor.config.ts
+
+      # inicia capacitor corretamente
       - name: Init Capacitor
-        run: npx cap init app.biblia "Biblia App" --web-dir=dist/client
+        run: npx cap init app.biblia "Biblia App" --web-dir=dist
 
       - name: Add Android
         run: npx cap add android
 
-      - name: Copy files
+      - name: Copiar arquivos
         run: npx cap copy
 
       - name: Build APK
         run: |
           cd android
-          chmod +x gradlew
           ./gradlew assembleDebug
 
-      - name: Upload APK
+      - name: Enviar APK
         uses: actions/upload-artifact@v4
         with:
           name: app-apk
