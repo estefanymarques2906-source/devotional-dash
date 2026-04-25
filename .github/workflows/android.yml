@@ -1,39 +1,38 @@
-name: Criar APK Completo
-on: [push, workflow_dispatch]
+name: Criar APK
+on: [push]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Baixar Código
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Configurar Node.js
+      - name: Configurar Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
-      - name: Configurar Java 21
+      - name: Configurar Java
         uses: actions/setup-java@v4
         with:
-          java-version: '21'
+          java-version: '17'
           distribution: 'temurin'
 
-      - name: Preparar e Buildar
+      - name: Build e Sync
         run: |
           npm install
           npm run build
           npx cap sync android
 
-      - name: Compilar APK
+      - name: Gerar APK
         run: |
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
 
-      - name: Disponibilizar Download
+      - name: Subir APK
         uses: actions/upload-artifact@v4
         with:
-          name: MeuAppInstalador
+          name: app-debug
           path: android/app/build/outputs/apk/debug/app-debug.apk
-
+          
