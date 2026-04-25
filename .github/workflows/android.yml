@@ -12,46 +12,52 @@ jobs:
       - name: Pegar arquivos do meu GitHub
         uses: actions/checkout@v4
 
-      - name: Configurar Java 17
+      - name: Configurar Java 17 (Coração do Android)
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'zulu'
+          cache: 'gradle'
 
       - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: Instalar dependências
-        run: npm install
-
-      - name: Juntar TUDO do Git para o APK
+      - name: Instalar e Preparar
         run: |
-          # 1. Cria a pasta que o Capacitor exige
+          npm install
           mkdir -p www
-          # 2. COPIA TODOS OS SEUS ARQUIVOS do GitHub para dentro da pasta do App
           cp -r . www/ 2>/dev/null || true
-          # 3. Remove configurações velhas que estão dando erro
-          rm -f capacitor.config.json capacitor.config.ts
-          # 4. Configura o App com os SEUS arquivos
+          rm -rf android capacitor.config.json capacitor.config.ts
+          
+      - name: Inicializar Capacitor
+        run: |
           npx cap init BibliaApp com.biblia.app --web-dir www
-          # 5. Cria a pasta android nova com os SEUS arquivos dentro
-          rm -rf android
           npx cap add android
 
-      - name: Sincronizar arquivos
-        run: npx cap sync android
-
-      - name: Gerar o APK agora
+      - name: FORÇAR JAVA 17 NO GRADLE
         run: |
           cd android
+          # Força o Gradle a usar o Java 17 que instalamos
+          echo "org.gradle.java.home=${JAVA_HOME}" >> gradle.properties
+          
+          # Ajusta o nível de compilação para Java 17 nos arquivos internos
+          sed -i 's/JavaVersion.VERSION_1_8/JavaVersion.VERSION_17/g' app/build.gradle
+          sed -i 's/JavaVersion.VERSION_11/JavaVersion.VERSION_17/g' app/build.gradle
+          
           chmod +x gradlew
-          ./gradlew assembleDebug
+
+      - name: Sincronizar e Build Final
+        run: |
+          npx cap sync android
+          cd android
+          # Limpa tudo e compila
+          ./gradlew clean assembleDebug --stacktrace
 
       - name: Me entregar o APK pronto
         uses: actions/upload-artifact@v4
         with:
-          name: meu-aplicativo-apk
+          name: aplicativo-final
           path: android/app/build/outputs/apk/debug/app-debug.apk
           
