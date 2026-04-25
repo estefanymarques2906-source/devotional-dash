@@ -11,10 +11,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Configurar Java 17
+      - name: Java 21 (Ajustado para o erro)
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: 'zulu'
 
       - name: Node 20
@@ -22,7 +22,7 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Preparar App e Capacitor
+      - name: Setup App
         run: |
           npm install
           mkdir -p www
@@ -31,27 +31,16 @@ jobs:
           npx cap init BibliaApp com.biblia.app --web-dir www
           npx cap add android
 
-      - name: FORÇAR VERSÃO 17 EM TUDO
+      - name: Sincronizar e Build
         run: |
+          npx cap sync android
           cd android
-          # Escreve o Java 17 no coração do projeto
-          echo "org.gradle.java.home=${JAVA_HOME}" >> gradle.properties
-          
-          # Comando de força bruta: procura e troca 1.8 ou 11 por 17 em todos os arquivos
-          find . -type f -name "*.gradle" -exec sed -i 's/JavaVersion.VERSION_1_8/JavaVersion.VERSION_17/g' {} +
-          find . -type f -name "*.gradle" -exec sed -i 's/JavaVersion.VERSION_11/JavaVersion.VERSION_17/g' {} +
-          
           chmod +x gradlew
-
-      - name: Gerar APK
-        run: |
-          cd android
           ./gradlew assembleDebug --no-daemon
 
-      - name: Upload APK
+      - name: Download APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-biblia-final
+          name: app-biblia
           path: android/app/build/outputs/apk/debug/app-debug.apk
-
-        
+          
