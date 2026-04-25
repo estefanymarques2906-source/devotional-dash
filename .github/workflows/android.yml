@@ -16,36 +16,26 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
       - name: Install deps
         run: npm install
 
-      - name: Build (forçando client)
-        run: |
-          npm run build || true
+      - name: Build
+        run: npm run build || true
 
-      - name: Corrigir estrutura (SSR → SPA)
+      - name: Corrigir estrutura
         run: |
           mkdir -p dist/client
-          
           if [ -f dist/index.html ]; then
             cp dist/index.html dist/client/
-          fi
-
-          if [ -d dist/client ]; then
-            echo "client ok"
-          else
-            echo "ERRO: sem client"
-            exit 1
           fi
 
       - name: Install Capacitor
         run: npm install @capacitor/core @capacitor/cli @capacitor/android
 
       - name: Init Capacitor
-        run: |
-          npx cap init app.biblia "Biblia App" --web-dir=dist/client
+        run: npx cap init app.biblia "Biblia App" --web-dir=dist/client
 
       - name: Add Android
         run: npx cap add android
