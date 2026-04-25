@@ -1,4 +1,4 @@
-name: Build APK Final
+name: Build APK Final com Icone
 
 on:
   push:
@@ -11,40 +11,38 @@ jobs:
       - name: Pegar arquivos do GitHub
         uses: actions/checkout@v4
 
-      - name: Configurar Java 21
+      - name: Configurar Java 21 e Node
         uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: 'zulu'
+        with: {java-version: '21', distribution: 'zulu'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '20'}
 
-      - name: Configurar Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Juntar Arquivos e Configurar Icone
+      - name: Preparar App e Converter Icone
         run: |
           npm install
-          # Cria a pasta que o Android lê
+          # Instala ferramenta para gerar ícones
+          npm install @capacitor/assets imagemagick
+          
+          # Junta todos os seus arquivos
           mkdir -p www
           cp -r . www/ || true
           
-          # Tenta gerar ícones se você tiver uma imagem icon.png ou logo.png
-          npx capacitor-assets generate --android || true
+          # CONVERTE O SEU FAVICON.ICO PARA PNG (Para o Android aceitar)
+          if [ -f "public/favicon.ico" ]; then
+            convert "public/favicon.ico[0]" icon.png
+          fi
 
-          # Limpeza de segurança
+          # Reseta e configura o Capacitor
           rm -rf android capacitor.config.*
+          # O server.androidScheme ajuda o app a abrir sem falhas
+          echo '{"appId":"com.biblia.app","appName":"Biblia App","webDir":"www","server":{"androidScheme":"https"}}' > capacitor.config.json
           
-          # Inicializa o App permitindo ler arquivos locais (ajuda a abrir)
-          npx cap init BibliaApp com.biblia.app --web-dir www
-          
-          # Cria a pasta Android do zero
           npx cap add android
-
-      - name: Ajustar Permissões para o App Abrir
-        run: |
-          # Esse comando permite que o app leia arquivos internos sem dar tela branca
-          sed -i 's/allowMixedContent: false/allowMixedContent: true/g' android/app/src/main/res/xml/network_security_config.xml || true
+          
+          # Gera os ícones do Android usando o arquivo convertido
+          if [ -f "icon.png" ]; then
+            npx @capacitor/assets generate --android --icon icon.png || true
+          fi
 
       - name: Gerar APK
         run: |
@@ -53,9 +51,9 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon
 
-      - name: Baixar o APK
+      - name: Download APK Pronto
         uses: actions/upload-artifact@v4
         with:
-          name: app-biblia-pronto
+          name: app-com-icone
           path: android/app/build/outputs/apk/debug/app-debug.apk
           
