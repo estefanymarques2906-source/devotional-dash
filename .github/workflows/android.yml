@@ -9,10 +9,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout do código
+      - name: Pegar arquivos do meu GitHub
         uses: actions/checkout@v4
 
-      - name: Configurar Java (JDK 17) - NECESSÁRIO PARA ANDROID ATUAL
+      - name: Configurar Java 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
@@ -26,34 +26,32 @@ jobs:
       - name: Instalar dependências
         run: npm install
 
-      - name: Build do Web App
-        run: npm run build --if-present
-
-      - name: Preparar Pastas e Capacitor
+      - name: Juntar TUDO do Git para o APK
         run: |
+          # 1. Cria a pasta que o Capacitor exige
           mkdir -p www
-          cp -rn . www/ 2>/dev/null || true
+          # 2. COPIA TODOS OS SEUS ARQUIVOS do GitHub para dentro da pasta do App
+          cp -r . www/ 2>/dev/null || true
+          # 3. Remove configurações velhas que estão dando erro
           rm -f capacitor.config.json capacitor.config.ts
+          # 4. Configura o App com os SEUS arquivos
           npx cap init BibliaApp com.biblia.app --web-dir www
-          npx cap add android || true
+          # 5. Cria a pasta android nova com os SEUS arquivos dentro
+          rm -rf android
+          npx cap add android
 
-      - name: Sincronizar Projeto
+      - name: Sincronizar arquivos
         run: npx cap sync android
 
-      - name: Corrigir Versão do Java no Gradle
+      - name: Gerar o APK agora
         run: |
           cd android
-          echo "org.gradle.java.home=${JAVA_HOME_17_X64}" >> gradle.properties
           chmod +x gradlew
+          ./gradlew assembleDebug
 
-      - name: Criar APK (Gradle)
-        run: |
-          cd android
-          ./gradlew assembleDebug --stacktrace
-
-      - name: Disponibilizar APK para Download
+      - name: Me entregar o APK pronto
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug
+          name: meu-aplicativo-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
           
