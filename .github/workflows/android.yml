@@ -10,7 +10,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Baixar código
+        uses: actions/checkout@v3
 
       - name: Instalar Node
         uses: actions/setup-node@v3
@@ -23,12 +24,19 @@ jobs:
       - name: Build do projeto
         run: npm run build
 
+      - name: Garantir index.html no lugar certo
+        run: |
+          if [ -f dist/index.html ]; then
+            mkdir -p dist/client
+            cp dist/index.html dist/client/
+          fi
+
       - name: Instalar Capacitor
         run: npm install @capacitor/core @capacitor/cli @capacitor/android
 
       - name: Criar projeto Android
         run: |
-          npx cap init app.biblia "Biblia App" --web-dir=dist
+          npx cap init app.biblia "Biblia App" --web-dir=dist/client
           npx cap add android
 
       - name: Copiar build
@@ -40,7 +48,7 @@ jobs:
           ./gradlew assembleDebug
 
       - name: Upload APK
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: app-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
