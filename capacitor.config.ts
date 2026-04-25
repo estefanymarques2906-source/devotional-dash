@@ -3,7 +3,7 @@ import type { CapacitorConfig } from "@capacitor/cli";
 const config: CapacitorConfig = {
   appId: "app.lovable.lumen.bible",
   appName: "Lumen — Bíblia Devocional",
-  webDir: "dist",
+  webDir: "dist/client",
   server: {
     androidScheme: "https",
   },
