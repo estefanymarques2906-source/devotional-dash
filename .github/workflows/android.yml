@@ -2,7 +2,7 @@ name: Build Android APK
 
 on:
   push:
-    branches: [ main, principal ] # Roda nas duas possíveis branches
+    branches: [ main, principal ]
 
 jobs:
   build:
@@ -23,36 +23,30 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Limpeza e Preparação
+      - name: Preparar Tudo (Copia arquivos do Git)
         run: |
           npm install
-          # Cria pasta limpa e copia só o que importa (seu index, css, js)
-          mkdir -p pasta_final
-          rsync -av . pasta_final/ --exclude android --exclude node_modules --exclude .github --exclude .git
-          
-          # Reseta tudo para não ter erro de "já existe"
-          rm -rf android capacitor.config.json capacitor.config.ts
-          
-          # Inicializa o Capacitor apontando para a pasta com seus arquivos
-          npx cap init BibliaApp com.biblia.app --web-dir pasta_final
+          mkdir -p www_final
+          # Copia seus arquivos para a pasta do app
+          cp -r . www_final/ || true
+          # Limpa lixo
+          rm -rf www_final/android www_final/node_modules www_final/.github
+          rm -rf android capacitor.config.*
+          # Configura o Capacitor
+          npx cap init BibliaApp com.biblia.app --web-dir www_final
           npx cap add android
 
-      - name: Sincronizar Projeto
+      - name: Sincronizar e Criar APK
         run: |
           npx cap sync android
           cd android
           echo "org.gradle.java.home=${JAVA_HOME}" >> gradle.properties
           chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
 
-      - name: Criar APK Final
-        run: |
-          cd android
-          # O 'clean' garante que comece do zero sem erros antigos
-          ./gradlew clean assembleDebug --no-daemon
-
-      - name: Me entregar o APK
+      - name: Me entregar o APK pronto
         uses: actions/upload-artifact@v4
         with:
-          name: meu-aplicativo
+          name: aplicativo-biblia
           path: android/app/build/outputs/apk/debug/app-debug.apk
           
