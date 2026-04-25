@@ -23,16 +23,22 @@ jobs:
       - name: Build do Web App
         run: npm run build --if-present
 
-      - name: Configurar Capacitor (Sem espaços e na Raiz)
+      - name: Organizar Arquivos e Configurar Capacitor
         run: |
-          # Limpeza total para evitar erros de "arquivo já existe" ou "ID inválido"
-          rm -f capacitor.config.json
-          rm -f capacitor.config.ts
+          # 1. Cria uma pasta chamada www
+          mkdir -p www
           
-          # Nome: BibliaApp (sem espaço) | ID: com.biblia.app | Pasta: ./ (raiz)
-          npx cap init BibliaApp com.biblia.app --web-dir ./
+          # 2. Copia TUDO do seu git para dentro dessa pasta (menos a própria pasta www e a pasta android)
+          # Isso garante que o index.html e tudo mais esteja onde o Capacitor gosta
+          cp -rn . www/ 2>/dev/null || true
           
-          # Adiciona a plataforma android (o || true evita erro se a pasta já existir)
+          # 3. Limpa configurações velhas
+          rm -f capacitor.config.json capacitor.config.ts
+          
+          # 4. Inicializa apontando para a pasta www que acabamos de criar
+          npx cap init BibliaApp com.biblia.app --web-dir www
+          
+          # 5. Adiciona a plataforma android
           npx cap add android || true
 
       - name: Sincronizar Projeto
