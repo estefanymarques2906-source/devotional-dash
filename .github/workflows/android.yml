@@ -1,38 +1,46 @@
-name: Criar APK
-on: [push]
+name: Build APK
+
+on:
+  push:
+    branches:
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
 
-      - name: Configurar Node
-        uses: actions/setup-node@v4
+      - name: Instalar Node
+        uses: actions/setup-node@v3
         with:
-          node-version: 22
+          node-version: 18
 
-      - name: Configurar Java
-        uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: 'temurin'
+      - name: Instalar dependências
+        run: npm install
 
-      - name: Build e Sync
+      - name: Build do projeto
+        run: npm run build
+
+      - name: Instalar Capacitor
+        run: npm install @capacitor/core @capacitor/cli @capacitor/android
+
+      - name: Criar projeto Android
         run: |
-          npm install
-          npm run build
-          npx cap sync android
+          npx cap init app.biblia "Biblia App" --web-dir=dist
+          npx cap add android
 
-      - name: Gerar APK
+      - name: Copiar build
+        run: npx cap copy
+
+      - name: Build APK
         run: |
           cd android
-          chmod +x gradlew
           ./gradlew assembleDebug
 
-      - name: Subir APK
-        uses: actions/upload-artifact@v4
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
         with:
-          name: app-debug
+          name: app-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
-          
