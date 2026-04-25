@@ -1,4 +1,4 @@
-name: Criar APK Completo
+  name: Criar APK Completo
 on: [push, workflow_dispatch]
 jobs:
   build:
@@ -21,25 +21,5 @@ jobs:
       - name: Preparar e Sincronizar Arquivos
         run: |
           npm install
-          # Cria a pasta www e limpa o que tiver lá
-          mkdir -p www
-          rm -rf www/*
-          # Copia TUDO o que você tem no Git para a pasta do App
-          cp -r . www/ || true
-          # Remove a pasta android de dentro da www para não dar erro
-          rm -rf www/android
-          # Sincroniza com o projeto nativo
+          npm run build
           npx cap sync android
-
-      - name: Compilar APK Final
-        run: |
-          cd android
-          chmod +x gradlew
-          ./gradlew assembleDebug
-
-      - name: Disponibilizar Download
-        uses: actions/upload-artifact@v4
-        with:
-          name: SeuAppInstalador
-          path: android/app/build/outputs/apk/debug/app-debug.apk
-          
