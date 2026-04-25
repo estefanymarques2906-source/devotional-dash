@@ -23,14 +23,14 @@ jobs:
       - name: Build do Web App
         run: npm run build --if-present
 
-      - name: Configurar Capacitor e Android
+      - name: Configurar Capacitor (Sem espaços e na Raiz)
         run: |
-          # Remove arquivos de configuração antigos para evitar conflitos de ID
+          # Limpeza total para evitar erros de "arquivo já existe" ou "ID inválido"
           rm -f capacitor.config.json
           rm -f capacitor.config.ts
           
-          # Inicializa com o ID CORRETO (sem espaços)
-          npx cap init "Biblia App" com.biblia.app --web-dir dist
+          # Nome: BibliaApp (sem espaço) | ID: com.biblia.app | Pasta: ./ (raiz)
+          npx cap init BibliaApp com.biblia.app --web-dir ./
           
           # Adiciona a plataforma android (o || true evita erro se a pasta já existir)
           npx cap add android || true
