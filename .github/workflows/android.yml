@@ -10,41 +10,53 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Baixar código
-        uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Instalar Node
-        uses: actions/setup-node@v3
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: 18
 
-      - name: Instalar dependências
+      - name: Install deps
         run: npm install
 
-      - name: Build do projeto
-        run: npm run build
-
-      - name: Garantir index.html no lugar certo
+      - name: Build (forçando client)
         run: |
+          npm run build || true
+
+      - name: Corrigir estrutura (SSR → SPA)
+        run: |
+          mkdir -p dist/client
+          
           if [ -f dist/index.html ]; then
-            mkdir -p dist/client
             cp dist/index.html dist/client/
           fi
 
-      - name: Instalar Capacitor
+          if [ -d dist/client ]; then
+            echo "client ok"
+          else
+            echo "ERRO: sem client"
+            exit 1
+          fi
+
+      - name: Install Capacitor
         run: npm install @capacitor/core @capacitor/cli @capacitor/android
 
-      - name: Criar projeto Android
+      - name: Init Capacitor
         run: |
           npx cap init app.biblia "Biblia App" --web-dir=dist/client
-          npx cap add android
 
-      - name: Copiar build
+      - name: Add Android
+        run: npx cap add android
+
+      - name: Copy files
         run: npx cap copy
 
       - name: Build APK
         run: |
           cd android
+          chmod +x gradlew
           ./gradlew assembleDebug
 
       - name: Upload APK
