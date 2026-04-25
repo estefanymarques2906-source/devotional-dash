@@ -2,7 +2,7 @@ name: Build Android APK
 
 on:
   push:
-    branches: [ main ] # Roda sempre que houver push na branch main
+    branches: [ main ]
 
 jobs:
   build:
@@ -21,15 +21,21 @@ jobs:
         run: npm install
 
       - name: Build do Web App
-        run: npm run build # Certifique-se que este comando gera a pasta 'dist' ou 'www'
+        run: npm run build --if-present
 
-      - name: Configurar Capacitor
+      - name: Configurar Capacitor e Android
         run: |
-          # Aqui corrigimos o erro: usamos um ID no formato com.exemplo.app
+          # Remove arquivos de configuração antigos para evitar conflitos de ID
+          rm -f capacitor.config.json
+          rm -f capacitor.config.ts
+          
+          # Inicializa com o ID CORRETO (sem espaços)
           npx cap init "Biblia App" com.biblia.app --web-dir dist
-          npx cap add android
+          
+          # Adiciona a plataforma android (o || true evita erro se a pasta já existir)
+          npx cap add android || true
 
-      - name: Sincronizar com Android
+      - name: Sincronizar Projeto
         run: npx cap sync android
 
       - name: Configurar Java (JDK 17)
