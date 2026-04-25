@@ -1,45 +1,28 @@
-name: Build APK Final
+name: Gerar Meu APK
 on:
+  workflow_dispatch:
   push:
-    branches: [ "main" ]
-
+    branches:
+      - main
+      - master
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup Node e Java
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - uses: actions/setup-java@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
-
-      - name: Preparar App
-        run: |
-          # 1. Instala apenas o essencial para não dar erro de opção
-          npm install @capacitor/core @capacitor/cli @capacitor/android --force
-          
-          # 2. Cria a pasta que o app precisa e copia seus arquivos
-          mkdir -p www
-          cp index.html www/index.html
-          cp icon.png www/icon.png || true
-          
-          # 3. Sincroniza sem tentar fazer builds complicados
-          npx cap sync android
-
-      - name: Gerar APK
+      - name: Criar APK
         run: |
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
-
-      - name: Upload APK
+      - name: Subir Arquivo
         uses: actions/upload-artifact@v4
         with:
-          name: meu-devocional-real
+          name: meu-app-pronto
           path: android/app/build/outputs/apk/debug/app-debug.apk
           
