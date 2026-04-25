@@ -1,6 +1,13 @@
 import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+// ... outros imports
 
 export default defineConfig({
-  plugins: [react()],
+  // Adicione isso:
+  optimizeDeps: {
+    esbuildOptions: {
+      external: ['esbuild']
+    }
+  },
+  // ... resto da config
 })
+
