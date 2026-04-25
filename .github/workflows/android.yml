@@ -34,7 +34,7 @@ jobs:
 
       # inicia capacitor corretamente
       - name: Init Capacitor
-        run: npx cap init app.biblia "Biblia App" --web-dir=dist
+        run: npx cap init com.biblia.app "Biblia App" --web-dir=dist
 
       - name: Add Android
         run: npx cap add android
