@@ -9,10 +9,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Pegar arquivos do GitHub
+      - name: Pegar arquivos
         uses: actions/checkout@v4
 
-      - name: Configurar Java 21 e Node
+      - name: Configurar Java e Node
         uses: actions/setup-java@v4
         with:
           java-version: '21'
@@ -21,22 +21,23 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Organizar e Sincronizar App
+      - name: Forçar Localização dos Arquivos
         run: |
           npm install @capacitor/core @capacitor/cli @capacitor/android @capacitor/assets
 
-          # 1. Cria a pasta limpa (sem o lixo do GitHub que engorda o app)
-          mkdir -p public_html
-          
-          # 2. Copia apenas o que é arquivo do seu app (HTML, JS, CSS, Imagens)
-          # Isso evita copiar a pasta 'android' para dentro dela mesma
-          cp index.html public_html/ || true
-          cp favicon.ico public_html/ || true
-          cp *.png public_html/ || true
-          cp -r assets public_html/ 2>/dev/null || true
-          cp -r www public_html/ 2>/dev/null || true
+          # 1. Tenta descobrir onde está o seu index.html real
+          # Se estiver dentro de uma pasta, ele vai achar e trazer para a frente
+          REAL_PATH=$(find . -name "index.html" -not -path "./android/*" -not -path "./node_modules/*" | head -n 1 | xargs dirname)
+          echo "Arquivos encontrados em: $REAL_PATH"
 
-          # 3. Configura o Capacitor apontando para a pasta correta
+          # 2. Cria a pasta do app e copia TUDO dessa localização
+          mkdir -p public_html
+          cp -r $REAL_PATH/* public_html/ || true
+          
+          # 3. Garante que o ícone exista para o build não quebrar
+          touch public_html/favicon.ico 
+
+          # 4. Configura o Capacitor
           echo '{
             "appId": "com.lumen.biblia",
             "appName": "Lumen Biblia",
@@ -44,17 +45,11 @@ jobs:
             "server": { "androidScheme": "https" }
           }' > capacitor.config.json
 
-          # 4. Atualiza o projeto Android
-          npx cap add android || true
+          # 5. Sincroniza (Removendo a pasta android antiga se houver erro)
+          npx cap add android || rm -rf android && npx cap add android
           npx cap sync android
 
-          # 5. Ícone do App
-          if [ -f "favicon.ico" ]; then
-            cp favicon.ico icon.png
-            npx @capacitor/assets generate --android || true
-          fi
-
-      - name: Gerar APK Final
+      - name: Gerar APK
         run: |
           cd android
           chmod +x gradlew
@@ -63,6 +58,6 @@ jobs:
       - name: Download APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-lumen-corrigido
+          name: app-lumen-v3
           path: android/app/build/outputs/apk/debug/app-debug.apk
           
