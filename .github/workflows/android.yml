@@ -1,4 +1,4 @@
-name: Build APK Final com Icone
+name: Build APK Final
 
 on:
   push:
@@ -17,29 +17,30 @@ jobs:
       - uses: actions/setup-node@v4
         with: {node-version: '20'}
 
-      - name: Preparar App e Converter Icone
+      - name: Preparar Icone e App
         run: |
-          npm install
-          # Instala ferramenta para gerar ícones
-          npm install @capacitor/assets imagemagick
+          # 1. Instalar ferramenta de conversão de imagem
+          sudo apt-get update
+          sudo apt-get install -y imagemagick
           
-          # Junta todos os seus arquivos
+          npm install
+          npm install @capacitor/assets
+          
           mkdir -p www
           cp -r . www/ || true
           
-          # CONVERTE O SEU FAVICON.ICO PARA PNG (Para o Android aceitar)
+          # 2. Converter o favicon para o formato do Android
           if [ -f "public/favicon.ico" ]; then
             convert "public/favicon.ico[0]" icon.png
           fi
 
-          # Reseta e configura o Capacitor
+          # 3. Configurar Capacitor
           rm -rf android capacitor.config.*
-          # O server.androidScheme ajuda o app a abrir sem falhas
           echo '{"appId":"com.biblia.app","appName":"Biblia App","webDir":"www","server":{"androidScheme":"https"}}' > capacitor.config.json
           
           npx cap add android
           
-          # Gera os ícones do Android usando o arquivo convertido
+          # 4. Gerar os ícones oficiais
           if [ -f "icon.png" ]; then
             npx @capacitor/assets generate --android --icon icon.png || true
           fi
@@ -51,9 +52,9 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon
 
-      - name: Download APK Pronto
+      - name: Download APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-com-icone
+          name: app-com-icone-v2
           path: android/app/build/outputs/apk/debug/app-debug.apk
           
