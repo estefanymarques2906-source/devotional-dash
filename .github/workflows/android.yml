@@ -21,48 +21,38 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Montar App Sem Erro de Loop
+      - name: Montar App Sem Erro
         run: |
           npm install @capacitor/core @capacitor/cli @capacitor/android @capacitor/assets
 
-          # 1. Limpa tudo antes de começar
-          rm -rf android dist tmp_build
-          mkdir -p tmp_build
+          # 1. Limpa tudo e cria a pasta fora da raiz de busca
+          rm -rf android dist
+          mkdir -p ../temp_build
+          
+          # 2. Copia TUDO do GitHub para a pasta temporária externa (evita o loop)
+          # Isso garante que seus 100MB de arquivos entrem no app
+          cp -R . ../temp_build/
 
-          # 2. Localiza o index.html e o favicon.ico
-          INDEX_FILE=$(find . -name "index.html" -not -path "*/node_modules/*" -not -path "*/android/*" | head -n 1)
-          FAVICON_FILE=$(find . -name "favicon.ico" -not -path "*/node_modules/*" -not -path "*/android/*" | head -n 1)
+          # 3. Move de volta para a pasta que o Capacitor vai ler
+          mkdir -p dist/client
+          cp -R ../temp_build/* dist/client/
 
-          if [ -z "$INDEX_FILE" ]; then
-            echo "ERRO: index.html não encontrado no GitHub!"
-            exit 1
-          fi
-
-          # 3. Copia o CONTEÚDO da pasta onde o index está para a pasta temporária
-          # Usamos o caminho absoluto para evitar o erro de 'copy into itself'
-          SOURCE_DIR=$(dirname $(realpath "$INDEX_FILE"))
-          cp -r "$SOURCE_DIR"/* tmp_build/
-
-          # 4. Garante que o favicon esteja lá (mesmo se estiver em outra pasta)
-          if [ ! -z "$FAVICON_FILE" ]; then
-            cp "$(realpath "$FAVICON_FILE")" tmp_build/favicon.ico
-          fi
-
-          # 5. Configura o Capacitor apontando para a pasta temporária
+          # 4. Configura o Capacitor apontando para a pasta com os 100MB
           echo '{
             "appId": "com.lumen.biblia",
             "appName": "Lumen Biblia",
-            "webDir": "tmp_build",
+            "webDir": "dist/client",
             "server": { "androidScheme": "https" }
           }' > capacitor.config.json
 
-          # 6. Gera o Android
+          # 5. Gera o Android do zero
           npx cap add android
           npx cap sync android
 
-          # 7. Gera os ícones a partir do favicon que achamos
-          if [ -f "tmp_build/favicon.ico" ]; then
-            cp tmp_build/favicon.ico icon.png
+          # 6. Tenta gerar o ícone a partir do favicon (onde quer que ele esteja)
+          FAVICON=$(find dist/client -name "favicon.ico" | head -n 1)
+          if [ ! -z "$FAVICON" ]; then
+            cp "$FAVICON" icon.png
             npx @capacitor/assets generate --android || true
           fi
 
@@ -75,6 +65,6 @@ jobs:
       - name: Download APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-lumen-vfinal
+          name: app-lumen-final-mesmo
           path: android/app/build/outputs/apk/debug/app-debug.apk
           
