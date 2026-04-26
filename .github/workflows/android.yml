@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Pegar tudo do GitHub
+      - name: Pegar arquivos do GitHub
         uses: actions/checkout@v4
 
       - name: Configurar Java 21 e Node
@@ -21,38 +21,37 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Juntar Tudo e Preparar App
+      - name: Organizar e Sincronizar App
         run: |
-          # Instala as ferramentas do Capacitor
           npm install @capacitor/core @capacitor/cli @capacitor/android @capacitor/assets
 
-          # 1. Cria a pasta de destino
-          mkdir -p dist/client
+          # 1. Cria a pasta limpa (sem o lixo do GitHub que engorda o app)
+          mkdir -p public_html
           
-          # 2. COPIA TUDO (O segredo para voltar aos 100MB)
-          # Isso joga todos os seus arquivos, imagens e subpastas para o build
-          cp -R ./* dist/client/ 2>/dev/null || true
+          # 2. Copia apenas o que é arquivo do seu app (HTML, JS, CSS, Imagens)
+          # Isso evita copiar a pasta 'android' para dentro dela mesma
+          cp index.html public_html/ || true
+          cp favicon.ico public_html/ || true
+          cp *.png public_html/ || true
+          cp -r assets public_html/ 2>/dev/null || true
+          cp -r www public_html/ 2>/dev/null || true
 
-          # 3. Garante que o arquivo de ícone tenha o nome que o gerador entende
-          if [ -f "favicon.ico" ]; then
-            cp favicon.ico icon.png
-          fi
-
-          # 4. Cria a configuração apontando para a pasta com TODOS os arquivos
+          # 3. Configura o Capacitor apontando para a pasta correta
           echo '{
             "appId": "com.lumen.biblia",
-            "appName": "Lumen Biblia Devocional",
-            "webDir": "dist/client",
+            "appName": "Lumen Biblia",
+            "webDir": "public_html",
             "server": { "androidScheme": "https" }
           }' > capacitor.config.json
 
-          # 5. Adiciona a plataforma Android e sincroniza os 100MB de arquivos
+          # 4. Atualiza o projeto Android
           npx cap add android || true
           npx cap sync android
 
-          # 6. Gera os ícones do App
-          if [ -f "icon.png" ]; then
-            npx @capacitor/assets generate --android || echo "Pulando geração de ícones"
+          # 5. Ícone do App
+          if [ -f "favicon.ico" ]; then
+            cp favicon.ico icon.png
+            npx @capacitor/assets generate --android || true
           fi
 
       - name: Gerar APK Final
@@ -64,6 +63,6 @@ jobs:
       - name: Download APK
         uses: actions/upload-artifact@v4
         with:
-          name: lumen-biblia-final
+          name: app-lumen-corrigido
           path: android/app/build/outputs/apk/debug/app-debug.apk
           
