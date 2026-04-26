@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Pegar arquivos do GitHub
+      - name: Pegar tudo do GitHub
         uses: actions/checkout@v4
 
       - name: Configurar Java 21 e Node
@@ -21,48 +21,41 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Preparar App e Icone
+      - name: Juntar Tudo e Preparar App
         run: |
-          sudo apt-get update && sudo apt-get install -y imagemagick
+          # Instala as ferramentas do Capacitor
           npm install @capacitor/core @capacitor/cli @capacitor/android @capacitor/assets
 
-          # 1. Limpa e cria a pasta de distribuição
-          rm -rf dist
+          # 1. Cria a pasta de destino
           mkdir -p dist/client
           
-          # 2. Copia seus arquivos para a pasta do app
-          cp index.html dist/client/ || true
-          cp favicon.ico dist/client/ || true
-          [ -d "assets" ] && cp -r assets dist/client/ || echo "Pasta assets não encontrada"
-          cp *.css dist/client/ || true
-          cp *.js dist/client/ || true
+          # 2. COPIA TUDO (O segredo para voltar aos 100MB)
+          # Isso joga todos os seus arquivos, imagens e subpastas para o build
+          cp -R ./* dist/client/ 2>/dev/null || true
 
-          # 3. Configuração do Capacitor
+          # 3. Garante que o arquivo de ícone tenha o nome que o gerador entende
+          if [ -f "favicon.ico" ]; then
+            cp favicon.ico icon.png
+          fi
+
+          # 4. Cria a configuração apontando para a pasta com TODOS os arquivos
           echo '{
             "appId": "com.lumen.biblia",
             "appName": "Lumen Biblia Devocional",
             "webDir": "dist/client",
-            "server": {
-              "androidScheme": "https"
-            }
+            "server": { "androidScheme": "https" }
           }' > capacitor.config.json
 
-          # 4. Comandos de sincronização (Corrigido)
+          # 5. Adiciona a plataforma Android e sincroniza os 100MB de arquivos
           npx cap add android || true
           npx cap sync android
 
-          # 5. Gerar ícones usando o favicon.ico
-          # Se o arquivo favicon.ico existir, ele será usado como base para o app
-          if [ -f "favicon.ico" ]; then
-            echo "Gerando ícones a partir do favicon.ico..."
-            # O Capacitor Assets geralmente busca por icon.png, então criamos uma cópia temporária
-            cp favicon.ico icon.png
-            npx @capacitor/assets generate --android
-          else
-            echo "ERRO: O arquivo favicon.ico não foi encontrado na raiz do GitHub."
+          # 6. Gera os ícones do App
+          if [ -f "icon.png" ]; then
+            npx @capacitor/assets generate --android || echo "Pulando geração de ícones"
           fi
 
-      - name: Gerar APK
+      - name: Gerar APK Final
         run: |
           cd android
           chmod +x gradlew
