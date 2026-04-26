@@ -27,17 +27,15 @@ jobs:
           npm install
           npm install @capacitor/assets
 
-          mkdir -p www
-          cp -r . www/ || true
+          # Criando a pasta que o seu erro pediu
+          mkdir -p dist/client
+          
+          # Se os seus arquivos estiverem na raiz, copia para lá
+          cp -r . dist/client/ || true
 
-          # Converte seu favicon para o ícone do Android
-          if [ -f "public/favicon.ico" ]; then
-            convert "public/favicon.ico" icon.png
-          fi
-
-          # CONFIGURAÇÃO COM NOME ATUALIZADO E DESTRAVE DE TELA BRANCA
+          # CONFIGURAÇÃO FORÇANDO A PASTA QUE DEU ERRO
           rm -rf android/capacitor.config.*
-          echo '{"appId":"com.lumen.biblia","appName":"Lumen Biblia Devocional","webDir":"www","server":{"androidScheme":"https","allowNavigation":["*"],"cleartext":true}}' > capacitor.config.json
+          echo '{"appId":"com.lumen.biblia","appName":"Lumen Biblia Devocional","webDir":"dist/client","server":{"androidScheme":"https","allowNavigation":["*"],"cleartext":true}}' > capacitor.config.json
 
           npx cap add android || true
 
