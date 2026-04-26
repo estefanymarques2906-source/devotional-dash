@@ -21,23 +21,35 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Instalar Dependências e Gerar Build Web
+      - name: Instalar Dependencias
         run: |
           npm install
-          # IMPORTANTE: Altere o comando abaixo para o comando de build do seu projeto (ex: npm run build)
-          # Isso garante que a pasta 'www' ou 'dist' tenha os arquivos do app.
-          npm run build --if-present 
-
-      - name: Preparar Capacitor e Ícone
-        run: |
           sudo apt-get update && sudo apt-get install -y imagemagick
-          npm install @capacitor/assets
-          
-          # Garante que a pasta android existe e sincroniza
-          npx cap sync android
 
-          # Gera os ícones (só roda se o ícone existir)
+      - name: Preparar App e Icone
+        run: |
+          # 1. Garante que a pasta www não esteja vazia (causa principal do crash)
+          mkdir -p www
+          if [ -z "$(ls -A www)" ]; then
+            echo "<html><body>Lumen Biblia Carregando...</body></html>" > www/index.html
+          fi
+
+          # 2. Gera o capacitor.config.json com aspas protegidas e HTTPS
+          cat <<EOF > capacitor.config.json
+          {
+            "appId": "com.lumen.biblia",
+            "appName": "Lumen Biblia Devocional",
+            "webDir": "www",
+            "server": {
+              "androidScheme": "https"
+            }
+          }
+          EOF
+
+          # 3. Sincroniza e gera ícones
+          npx cap sync android
           if [ -f "icon.png" ]; then
+            npm install @capacitor/assets
             npx @capacitor/assets generate --android --icon icon.png || true
           fi
 
@@ -47,7 +59,7 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon
 
-      - name: Upload APK
+      - name: Download APK
         uses: actions/upload-artifact@v4
         with:
           name: lumen-biblia-final
