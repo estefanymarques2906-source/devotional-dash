@@ -21,25 +21,25 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Juntar Conteúdo de Public e Src
+      - name: Juntar Conteúdo e Ícone
         run: |
           npm install @capacitor/core @capacitor/cli @capacitor/android @capacitor/assets
 
-          # 1. Limpa tudo para começar do zero
+          # 1. Limpeza e criação da pasta do app
           rm -rf android dist
           mkdir -p dist/client
 
-          # 2. PUXA TUDO DAS SUAS PASTAS REAIS (Aqui estão os 100MB)
-          # Copia o conteúdo de 'public' e 'src' para a pasta do app
-          [ -d "public" ] && cp -r public/* dist/client/ || echo "Pasta public não encontrada"
-          [ -d "src" ] && cp -r src/* dist/client/ || echo "Pasta src não encontrada"
+          # 2. Copia tudo de 'public' e 'src' para a pasta final
+          # Como o ícone está na public, ele será copiado aqui
+          cp -r public/* dist/client/ 2>/dev/null || true
+          cp -r src/* dist/client/ 2>/dev/null || true
           
-          # Copia arquivos soltos na raiz (como index.html e favicon)
-          cp index.html dist/client/ || true
-          cp favicon.ico dist/client/ || true
-          cp logo.png dist/client/ || true
+          # 3. Garante que o index.html e ícone estejam na raiz do build
+          # (Caso não tenham sido copiados acima)
+          cp public/favicon.ico dist/client/ 2>/dev/null || true
+          cp public/index.html dist/client/ 2>/dev/null || true
 
-          # 3. Configura o Capacitor apontando para a pasta que acabamos de encher
+          # 4. Configura o Capacitor
           echo '{
             "appId": "com.lumen.biblia",
             "appName": "Lumen Biblia",
@@ -47,14 +47,16 @@ jobs:
             "server": { "androidScheme": "https" }
           }' > capacitor.config.json
 
-          # 4. Gera o projeto Android
+          # 5. Gera o projeto Android
           npx cap add android
           npx cap sync android
 
-          # 5. Gera o ícone usando o favicon.ico que está na raiz
-          if [ -f "favicon.ico" ]; then
-            cp favicon.ico icon.png
+          # 6. Gera o ícone oficial do Android usando o favicon.ico da public
+          if [ -f "public/favicon.ico" ]; then
+            cp public/favicon.ico icon.png
             npx @capacitor/assets generate --android || true
+          else
+            echo "Aviso: favicon.ico não encontrado em public/"
           fi
 
       - name: Gerar APK
@@ -66,6 +68,6 @@ jobs:
       - name: Download APK
         uses: actions/upload-artifact@v4
         with:
-          name: lumen-app-com-pastas
+          name: lumen-app-final-corrigido
           path: android/app/build/outputs/apk/debug/app-debug.apk
           
