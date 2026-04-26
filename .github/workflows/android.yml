@@ -24,21 +24,20 @@ jobs:
       - name: Preparar App e Icone
         run: |
           sudo apt-get update && sudo apt-get install -y imagemagick
-          npm install
-          npm install @capacitor/assets @capacitor/android
+          npm install @capacitor/core @capacitor/cli @capacitor/android @capacitor/assets
 
           # 1. Limpa e cria a pasta de distribuição
           rm -rf dist
           mkdir -p dist/client
           
-          # 2. Copia seus arquivos web (ajuste se seus nomes de arquivo forem diferentes)
-          # Aqui copiamos o que é essencial para o app não abrir em branco
+          # 2. Copia seus arquivos para a pasta do app
           cp index.html dist/client/ || true
-          cp -r assets dist/client/ || true
+          cp favicon.ico dist/client/ || true
+          [ -d "assets" ] && cp -r assets dist/client/ || echo "Pasta assets não encontrada"
           cp *.css dist/client/ || true
           cp *.js dist/client/ || true
 
-          # 3. Cria o config do Capacitor do zero para evitar erro de caminho
+          # 3. Configuração do Capacitor
           echo '{
             "appId": "com.lumen.biblia",
             "appName": "Lumen Biblia Devocional",
@@ -48,14 +47,19 @@ jobs:
             }
           }' > capacitor.config.json
 
-          # 4. Sincroniza o projeto
-          npx cap source @capacitor/android
+          # 4. Comandos de sincronização (Corrigido)
           npx cap add android || true
           npx cap sync android
 
-          # 5. Gera os ícones se o icon.png existir
-          if [ -f "icon.png" ]; then
+          # 5. Gerar ícones usando o favicon.ico
+          # Se o arquivo favicon.ico existir, ele será usado como base para o app
+          if [ -f "favicon.ico" ]; then
+            echo "Gerando ícones a partir do favicon.ico..."
+            # O Capacitor Assets geralmente busca por icon.png, então criamos uma cópia temporária
+            cp favicon.ico icon.png
             npx @capacitor/assets generate --android
+          else
+            echo "ERRO: O arquivo favicon.ico não foi encontrado na raiz do GitHub."
           fi
 
       - name: Gerar APK
