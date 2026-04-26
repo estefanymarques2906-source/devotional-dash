@@ -1,79 +1,71 @@
-name: Build APK
+name: Build APK Final
 
 on:
   push:
-    branches: [main, principal]
-  workflow_dispatch:
+    branches: [ main, principal ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Pegar arquivos do GitHub
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v4
+      - name: Configurar Java e Node
+        uses: actions/setup-java@v4
         with:
-          java-version: "21"
-          distribution: "zulu"
-
+          java-version: '21'
+          distribution: 'zulu'
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: "npm"
+          node-version: '20'
 
-      - name: Instalar dependências
-        run: npm ci || npm install
-
-      - name: Build do app web
-        run: npm run build
-
-      - name: Gerar index.html do Capacitor com bootstrap real
+      - name: Juntar Conteúdo de Public e Src
         run: |
-          CLIENT_ENTRY=$(node -e "const fs=require('fs'); const path=require('path'); const dir='dist/client/assets'; const files=fs.readdirSync(dir).filter(f => /^index-.*\.js$/.test(f)); const scored=files.map(file => { const full=path.join(dir, file); const code=fs.readFileSync(full, 'utf8'); const size=fs.statSync(full).size; const score=(/hydrateRoot\(document/.test(code) ? 100 : 0) + (/__TSS_START_OPTIONS__/.test(code) ? 50 : 0) + (/startTransition\(/.test(code) ? 25 : 0) + size / 1000000; return { file, score, size }; }).sort((a, b) => b.score - a.score || b.size - a.size); if (!scored[0]) process.exit(1); process.stdout.write(scored[0].file)")
-          CLIENT_CSS=$(node -e "const fs=require('fs'); const dir='dist/client/assets'; const files=fs.readdirSync(dir).filter(f => /^styles-.*\.css$/.test(f)); if (files[0]) process.stdout.write(files[0])")
+          npm install @capacitor/core @capacitor/cli @capacitor/android @capacitor/assets
 
-          echo "Bootstrap JS: $CLIENT_ENTRY"
-          echo "CSS principal: $CLIENT_CSS"
+          # 1. Limpa tudo para começar do zero
+          rm -rf android dist
+          mkdir -p dist/client
 
-          node -e "const fs=require('fs'); const code=fs.readFileSync('dist/client/assets/' + process.argv[1], 'utf8'); if (!/hydrateRoot\(document/.test(code)) { console.error('Entrada errada do app detectada:', process.argv[1]); process.exit(1); }" "$CLIENT_ENTRY"
+          # 2. PUXA TUDO DAS SUAS PASTAS REAIS (Aqui estão os 100MB)
+          # Copia o conteúdo de 'public' e 'src' para a pasta do app
+          [ -d "public" ] && cp -r public/* dist/client/ || echo "Pasta public não encontrada"
+          [ -d "src" ] && cp -r src/* dist/client/ || echo "Pasta src não encontrada"
+          
+          # Copia arquivos soltos na raiz (como index.html e favicon)
+          cp index.html dist/client/ || true
+          cp favicon.ico dist/client/ || true
+          cp logo.png dist/client/ || true
 
-          cat > dist/client/index.html <<HTML
-          <!doctype html>
-          <html lang="pt-BR">
-            <head>
-              <meta charset="UTF-8" />
-              <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-              <base href="./" />
-              <title>Lumen — Bíblia Devocional</title>
-              <link rel="icon" href="./favicon.ico" />
-              <meta name="theme-color" content="#1a1d2e" />
-              ${CLIENT_CSS:+<link rel="stylesheet" href="./assets/$CLIENT_CSS" />}
-            </head>
-            <body>
-              <div id="root"></div>
-              <script type="module" src="./assets/$CLIENT_ENTRY"></script>
-            </body>
-          </html>
-          HTML
+          # 3. Configura o Capacitor apontando para a pasta que acabamos de encher
+          echo '{
+            "appId": "com.lumen.biblia",
+            "appName": "Lumen Biblia",
+            "webDir": "dist/client",
+            "server": { "androidScheme": "https" }
+          }' > capacitor.config.json
 
-          echo "--- index.html gerado ---"
-          cat dist/client/index.html
-
-      - name: Sincronizar Capacitor com Android
-        run: |
-          if [ ! -d android ]; then
-            npx cap add android
-          fi
+          # 4. Gera o projeto Android
+          npx cap add android
           npx cap sync android
 
-      - name: Construir APK debug
+          # 5. Gera o ícone usando o favicon.ico que está na raiz
+          if [ -f "favicon.ico" ]; then
+            cp favicon.ico icon.png
+            npx @capacitor/assets generate --android || true
+          fi
+
+      - name: Gerar APK
         run: |
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon
 
-      - name: Upload APK
+      - name: Download APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug
+          name: lumen-app-com-pastas
           path: android/app/build/outputs/apk/debug/app-debug.apk
+          
