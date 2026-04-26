@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Pegar TUDO do GitHub
+      - name: Pegar arquivos do GitHub
         uses: actions/checkout@v4
 
       - name: Configurar Java e Node
@@ -21,29 +21,36 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Preparar App com Todos os Arquivos
+      - name: Juntar Tudo no App
         run: |
+          # 1. Instala as ferramentas necessárias
           npm install @capacitor/core @capacitor/cli @capacitor/android @capacitor/assets
 
-          # 1. Limpa rastros de builds antigos
-          rm -rf android
+          # 2. Cria uma pasta limpa para o App
+          mkdir -p projeto_completo
           
-          # 2. Cria o arquivo de configuração na RAIZ
-          # Definimos o webDir como "." para ele pegar tudo o que existe no repositório
+          # 3. Move TUDO do seu GitHub para essa pasta (fotos, vídeos, tudo)
+          # Usamos o 'find' para evitar copiar a pasta 'android' e o próprio script
+          find . -maxdepth 1 -not -name 'projeto_completo' -not -name '.git' -not -name '.github' -not -name 'android' -not -name '.' -exec cp -rv {} projeto_completo/ \;
+
+          # 4. Cria a configuração apontando para onde estão seus 100MB
           echo '{
             "appId": "com.lumen.biblia",
             "appName": "Lumen Biblia",
-            "webDir": ".", 
+            "webDir": "projeto_completo",
             "server": { "androidScheme": "https" }
           }' > capacitor.config.json
 
-          # 3. Adiciona a plataforma e sincroniza TUDO o que está no Git
+          # 5. Prepara o Android do zero
+          rm -rf android
           npx cap add android
-          
-          # Removemos o que não deve ir para o APK para não engordar com lixo
-          rm -rf node_modules
-          
           npx cap sync android
+
+          # 6. Tenta gerar o ícone com o seu favicon
+          if [ -f "favicon.ico" ]; then
+            cp favicon.ico icon.png
+            npx @capacitor/assets generate --android || true
+          fi
 
       - name: Gerar APK
         run: |
@@ -54,6 +61,6 @@ jobs:
       - name: Download APK
         uses: actions/upload-artifact@v4
         with:
-          name: lumen-app-total
+          name: app-lumen-completo
           path: android/app/build/outputs/apk/debug/app-debug.apk
           
