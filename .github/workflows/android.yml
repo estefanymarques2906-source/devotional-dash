@@ -27,11 +27,13 @@ jobs:
       - name: Build do app web
         run: npm run build
 
-      - name: Gerar index.html shell para Capacitor
+      - name: Gerar index.html do Capacitor com bootstrap real
         run: |
-          # Descobrir o entry JS principal (maior arquivo index-*.js)
-          ENTRY=$(ls -S dist/client/assets/index-*.js | head -1 | xargs basename)
-          echo "Entry detectado: $ENTRY"
+          CLIENT_ENTRY=$(node -e "const fs=require('fs'); const dir='dist/client/assets'; const files=fs.readdirSync(dir).filter(f => /^index-.*\.js$/.test(f)); const chosen=files.find(f => fs.readFileSync(dir + '/' + f, 'utf8').includes('document.getElementById')) || files[0]; if (!chosen) process.exit(1); process.stdout.write(chosen)")
+          CLIENT_CSS=$(node -e "const fs=require('fs'); const dir='dist/client/assets'; const files=fs.readdirSync(dir).filter(f => /^styles-.*\.css$/.test(f)); if (files[0]) process.stdout.write(files[0])")
+
+          echo "Bootstrap JS: $CLIENT_ENTRY"
+          echo "CSS principal: $CLIENT_CSS"
 
           cat > dist/client/index.html <<HTML
           <!doctype html>
@@ -40,11 +42,13 @@ jobs:
               <meta charset="UTF-8" />
               <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
               <title>Lumen — Bíblia Devocional</title>
-              <link rel="icon" href="/favicon.ico" />
+              <link rel="icon" href="./favicon.ico" />
+              <meta name="theme-color" content="#1a1d2e" />
+              ${CLIENT_CSS:+<link rel="stylesheet" href="./assets/$CLIENT_CSS" />}
             </head>
             <body>
               <div id="root"></div>
-              <script type="module" src="/assets/$ENTRY"></script>
+              <script type="module" src="./assets/$CLIENT_ENTRY"></script>
             </body>
           </html>
           HTML
@@ -54,8 +58,9 @@ jobs:
 
       - name: Sincronizar Capacitor com Android
         run: |
-          rm -rf android
-          npx cap add android
+          if [ ! -d android ]; then
+            npx cap add android
+          fi
           npx cap sync android
 
       - name: Construir APK debug
