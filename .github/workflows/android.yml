@@ -21,40 +21,33 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Instalar Dependencias
-        run: |
-          npm install
-          sudo apt-get update && sudo apt-get install -y imagemagick
-
       - name: Preparar App e Icone
         run: |
-          # 1. Garante que a pasta www não esteja vazia (causa principal do crash)
+          sudo apt-get update && sudo apt-get install -y imagemagick
+          npm install
+          npm install @capacitor/assets
+
           mkdir -p www
-          if [ -z "$(ls -A www)" ]; then
-            echo "<html><body>Lumen Biblia Carregando...</body></html>" > www/index.html
+          cp -r . www/ || true
+
+          # Converte seu favicon para o ícone do Android
+          if [ -f "public/favicon.ico" ]; then
+            convert "public/favicon.ico" icon.png
           fi
 
-          # 2. Gera o capacitor.config.json com aspas protegidas e HTTPS
-          cat <<EOF > capacitor.config.json
-          {
-            "appId": "com.lumen.biblia",
-            "appName": "Lumen Biblia Devocional",
-            "webDir": "www",
-            "server": {
-              "androidScheme": "https"
-            }
-          }
-          EOF
+          # CONFIGURAÇÃO COM NOME ATUALIZADO E DESTRAVE DE TELA BRANCA
+          rm -rf android/capacitor.config.*
+          echo '{"appId":"com.lumen.biblia","appName":"Lumen Biblia Devocional","webDir":"www","server":{"androidScheme":"https","allowNavigation":["*"],"cleartext":true}}' > capacitor.config.json
 
-          # 3. Sincroniza e gera ícones
-          npx cap sync android
+          npx cap add android || true
+
           if [ -f "icon.png" ]; then
-            npm install @capacitor/assets
             npx @capacitor/assets generate --android --icon icon.png || true
           fi
 
       - name: Gerar APK
         run: |
+          npx cap sync android
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon
