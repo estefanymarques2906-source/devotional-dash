@@ -12,7 +12,7 @@ jobs:
       - name: Pegar arquivos
         uses: actions/checkout@v4
 
-      - name: Configurar Java e Node
+      - name: Configurar Ambiente
         uses: actions/setup-java@v4
         with:
           java-version: '21'
@@ -21,24 +21,32 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Preparar Pasta e Capacitor
+      - name: Localizar e Juntar Tudo
         run: |
-          # 1. Instala o Capacitor
           npm install @capacitor/core @capacitor/cli @capacitor/android @capacitor/assets
-
-          # 2. LIMPEZA TOTAL (Evita o erro de pasta existente)
-          rm -rf android
-          rm -rf dist
+          
+          # Limpeza
+          rm -rf android dist
           mkdir -p dist/client
 
-          # 3. COPIA OS ARQUIVOS (Ajustado para não dar erro de loop)
+          # MOSTRAR NO LOG O QUE TEM NO GITHUB (Para a gente achar os 100MB)
+          echo "Lista de arquivos no repositório:"
+          ls -R
+
+          # Copia o básico
           cp index.html dist/client/ || true
           cp favicon.ico dist/client/ || true
           cp logo.png dist/client/ || true
+
+          # Tenta copiar TODAS as pastas que podem conter os 100MB
+          # Adicionei várias opções comuns
           cp -r assets/* dist/client/ 2>/dev/null || true
           cp -r www/* dist/client/ 2>/dev/null || true
+          cp -r public/* dist/client/ 2>/dev/null || true
+          cp -r src/* dist/client/ 2>/dev/null || true
+          cp -r content/* dist/client/ 2>/dev/null || true
 
-          # 4. CRIA O CONFIG (Exatamente como o Capacitor pede no erro)
+          # Configura e Sincroniza
           echo '{
             "appId": "com.lumen.biblia",
             "appName": "Lumen Biblia",
@@ -46,15 +54,8 @@ jobs:
             "server": { "androidScheme": "https" }
           }' > capacitor.config.json
 
-          # 5. GERA O PROJETO ANDROID
           npx cap add android
           npx cap sync android
-
-          # 6. GERA O ÍCONE (favicon.ico -> icon.png)
-          if [ -f "favicon.ico" ]; then
-            cp favicon.ico icon.png
-            npx @capacitor/assets generate --android || true
-          fi
 
       - name: Gerar APK
         run: |
@@ -65,6 +66,6 @@ jobs:
       - name: Download APK
         uses: actions/upload-artifact@v4
         with:
-          name: lumen-app-corrigido
+          name: lumen-app-completo
           path: android/app/build/outputs/apk/debug/app-debug.apk
           
