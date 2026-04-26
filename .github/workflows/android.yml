@@ -7,48 +7,47 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Pegar arquivos do GitHub
         uses: actions/checkout@v4
 
       - name: Configurar Java 21 e Node
         uses: actions/setup-java@v4
-        with: {java-version: '21', distribution: 'zulu'}
+        with:
+          java-version: '21'
+          distribution: 'zulu'
       - uses: actions/setup-node@v4
-        with: {node-version: '20'}
+        with:
+          node-version: '20'
 
-      - name: Preparar App e Icone
+      - name: Instalar Dependências e Gerar Build Web
+        run: |
+          npm install
+          # IMPORTANTE: Altere o comando abaixo para o comando de build do seu projeto (ex: npm run build)
+          # Isso garante que a pasta 'www' ou 'dist' tenha os arquivos do app.
+          npm run build --if-present 
+
+      - name: Preparar Capacitor e Ícone
         run: |
           sudo apt-get update && sudo apt-get install -y imagemagick
-          npm install
           npm install @capacitor/assets
           
-          mkdir -p www
-          cp -r . www/ || true
-          
-          # Converte seu favicon para o ícone do Android
-          if [ -f "public/favicon.ico" ]; then
-            convert "public/favicon.ico" icon.png
-          fi
+          # Garante que a pasta android existe e sincroniza
+          npx cap sync android
 
-          # CONFIGURAÇÃO COM NOME ATUALIZADO E DESTRAVE DE TELA BRANCA
-          rm -rf android capacitor.config.*
-          echo '{"appId":"com.lumen.biblia","appName":"Lumen Bíblia Devocional","webDir":"www","server":{"androidScheme":"http","cleartext":true}}' > capacitor.config.json
-          
-          npx cap add android
-          
+          # Gera os ícones (só roda se o ícone existir)
           if [ -f "icon.png" ]; then
             npx @capacitor/assets generate --android --icon icon.png || true
           fi
 
       - name: Gerar APK
         run: |
-          npx cap sync android
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon
 
-      - name: Download APK
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: lumen-biblia-final
