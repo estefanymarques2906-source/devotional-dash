@@ -21,24 +21,24 @@ jobs:
       - name: Instalar Bun
         uses: oven-sh/setup-bun@v1
 
-      - name: Construir Projeto
+      - name: Construir Projeto Real
         run: |
-          # 1. Instala e constrói o projeto (gera os 100MB)
+          # 1. Instala e gera os arquivos (os 100MB)
           bun install
           bun run build
 
-          # 2. Verifica onde o Vite criou os arquivos e garante a pasta certa
-          # Se o Vite criou 'dist', nós garantimos que 'dist/client' exista para o Capacitor não chorar
-          if [ -d "dist" ] && [ ! -d "dist/client" ]; then
-            mkdir -p dist/client
-            cp -r dist/* dist/client/ 2>/dev/null || true
-          fi
+          # 2. FORÇA a pasta ter o nome que o Capacitor quer
+          # Se o Vite criou 'dist', nós renomeamos para 'dist/client'
+          mkdir -p dist/client
+          cp -r dist/* dist/client/ 2>/dev/null || true
 
           # 3. Instala o Capacitor
           npm install @capacitor/core @capacitor/cli @capacitor/android @capacitor/assets
 
-          # 4. Configura o Capacitor exatamente onde os arquivos estão
+          # 4. Limpa qualquer erro de plataforma antiga
           rm -rf android
+          
+          # 5. Configura o arquivo apontando para onde forçamos os arquivos
           echo '{
             "appId": "com.lumen.biblia",
             "appName": "Lumen Biblia",
@@ -46,12 +46,11 @@ jobs:
             "server": { "androidScheme": "https" }
           }' > capacitor.config.json
 
-          # 5. Sincroniza
+          # 6. Sincroniza
           npx cap add android
           npx cap sync android
 
-          # 6. Gera o ícone do App usando seu favicon.ico
-          # O log mostrou que o favicon está em public/
+          # 7. Gera o ícone do App (favicon.ico que está na public)
           if [ -f "public/favicon.ico" ]; then
             cp public/favicon.ico icon.png
             npx @capacitor/assets generate --android || true
@@ -66,6 +65,6 @@ jobs:
       - name: Download APK
         uses: actions/upload-artifact@v4
         with:
-          name: lumen-app-total-corrigido
+          name: lumen-biblia-definitivo
           path: android/app/build/outputs/apk/debug/app-debug.apk
           
