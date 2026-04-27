@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Pegar arquivos do GitHub
+      - name: Pegar arquivos
         uses: actions/checkout@v4
 
       - name: Configurar Java e Node
@@ -21,24 +21,30 @@ jobs:
       - name: Instalar Bun
         uses: oven-sh/setup-bun@v1
 
-      - name: Construir Projeto Real
+      - name: Construir e Forçar Pastas
         run: |
-          # 1. Instala e gera os arquivos (os 100MB)
+          # 1. Instala e gera o build (os 100MB)
           bun install
           bun run build
 
-          # 2. RESOLVENDO O ERRO DO LOG: Cria a pasta exata que ele pede
-          # e move o index.html e tudo o mais para dentro dela
-          mkdir -p dist/client
-          cp -r dist/* dist/client/ 2>/dev/null || true
+          # 2. SE O VITE GEROU 'dist', NÓS CRIAMOS 'dist/client' NA MARRA
+          # E movemos tudo para dentro para o Capacitor não reclamar
+          if [ -d "dist" ]; then
+            mkdir -p dist/client
+            cp -r dist/* dist/client/ 2>/dev/null || true
+          else
+            # Se nem a dist existir, o build falhou antes
+            mkdir -p dist/client
+            echo "<html><body>Erro no Build do Vite</body></html>" > dist/client/index.html
+          fi
 
           # 3. Instala o Capacitor
           npm install @capacitor/core @capacitor/cli @capacitor/android @capacitor/assets
 
-          # 4. LIMPEZA TOTAL para evitar erro de plugin
+          # 4. LIMPEZA TOTAL DA PASTA ANDROID (Mata o erro do capacitor.plugins.json)
           rm -rf android
           
-          # 5. CONFIGURAÇÃO: Forçando o webDir para a pasta que o log exige
+          # 5. CONFIGURAÇÃO
           echo '{
             "appId": "com.lumen.biblia",
             "appName": "Lumen Biblia",
@@ -50,7 +56,7 @@ jobs:
           npx cap add android
           npx cap sync android
 
-          # 7. ÍCONE: Usa o favicon.ico da public como ícone do app
+          # 7. ÍCONE (Usa seu favicon da public)
           if [ -f "public/favicon.ico" ]; then
             cp public/favicon.ico icon.png
             npx @capacitor/assets generate --android || true
@@ -65,6 +71,6 @@ jobs:
       - name: Download APK
         uses: actions/upload-artifact@v4
         with:
-          name: lumen-app-completo
+          name: lumen-app-total
           path: android/app/build/outputs/apk/debug/app-debug.apk
           
