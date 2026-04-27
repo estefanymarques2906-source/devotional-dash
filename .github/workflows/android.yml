@@ -9,10 +9,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Pegar arquivos
+      - name: Pegar arquivos do GitHub
         uses: actions/checkout@v4
 
-      - name: Configurar Java e Node
+      - name: Configurar Java 21 e Node
         uses: actions/setup-java@v4
         with:
           java-version: '21'
@@ -21,22 +21,25 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Construir App Limpo
+      - name: Juntar Tudo e Criar App
         run: |
           npm install @capacitor/core @capacitor/cli @capacitor/android @capacitor/assets
 
-          # 1. Cria a pasta de build e limpa qualquer erro anterior
-          rm -rf android dist
+          # 1. LIMPEZA TOTAL: Remove pastas que causam erro de conflito
+          rm -rf android
+          rm -rf Android
+          rm -rf dist
           mkdir -p dist/client
 
-          # 2. Copia seus 100MB de arquivos (fotos e códigos)
-          # Ele busca em public, src ou na raiz
+          # 2. COPIA OS ARQUIVOS: Pega seu index.html e seu favicon.ico da raiz
+          # O comando abaixo evita o erro de "copy into itself"
           cp index.html dist/client/ || true
           cp favicon.ico dist/client/ || true
-          cp -r public/* dist/client/ 2>/dev/null || true
-          cp -r src/* dist/client/ 2>/dev/null || true
+          # Se você tiver outras pastas como 'public' ou 'src', copia elas também
+          [ -d "public" ] && cp -r public/* dist/client/ || true
+          [ -d "src" ] && cp -r src/* dist/client/ || true
 
-          # 3. Configuração do App
+          # 3. CONFIGURAÇÃO: Aponta o app para a pasta que acabamos de criar
           echo '{
             "appId": "com.lumen.biblia",
             "appName": "Lumen Biblia",
@@ -44,17 +47,17 @@ jobs:
             "server": { "androidScheme": "https" }
           }' > capacitor.config.json
 
-          # 4. Gera a pasta android NOVA (isso evita o erro de fechar o app)
+          # 4. GERA O ANDROID: Cria a plataforma do zero (limpa e sem erros)
           npx cap add android
           npx cap sync android
 
-          # 5. Gera o ícone do app
-          if [ -f "dist/client/favicon.ico" ]; then
-            cp dist/client/favicon.ico icon.png
+          # 5. ÍCONE: Transforma seu favicon.ico no ícone oficial do Android
+          if [ -f "favicon.ico" ]; then
+            cp favicon.ico icon.png
             npx @capacitor/assets generate --android || true
           fi
 
-      - name: Gerar APK
+      - name: Gerar APK Final
         run: |
           cd android
           chmod +x gradlew
@@ -63,6 +66,6 @@ jobs:
       - name: Download APK
         uses: actions/upload-artifact@v4
         with:
-          name: lumen-app-final
+          name: lumen-biblia-final
           path: android/app/build/outputs/apk/debug/app-debug.apk
           
