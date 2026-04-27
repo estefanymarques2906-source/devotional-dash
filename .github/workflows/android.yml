@@ -21,31 +21,37 @@ jobs:
       - name: Instalar Bun
         uses: oven-sh/setup-bun@v1
 
-      - name: Construir Projeto com Bun
+      - name: Construir Projeto
         run: |
-          # 1. Instala tudo usando o Bun (que é o que você usa)
+          # 1. Instala e constrói o projeto (gera os 100MB)
           bun install
-
-          # 2. Gera os arquivos reais do app (os 100MB)
           bun run build
 
-          # 3. Instala o Capacitor para gerar o APK
+          # 2. Verifica onde o Vite criou os arquivos e garante a pasta certa
+          # Se o Vite criou 'dist', nós garantimos que 'dist/client' exista para o Capacitor não chorar
+          if [ -d "dist" ] && [ ! -d "dist/client" ]; then
+            mkdir -p dist/client
+            cp -r dist/* dist/client/ 2>/dev/null || true
+          fi
+
+          # 3. Instala o Capacitor
           npm install @capacitor/core @capacitor/cli @capacitor/android @capacitor/assets
 
-          # 4. Configura o Capacitor para ler a pasta 'dist' que o Bun criou
+          # 4. Configura o Capacitor exatamente onde os arquivos estão
           rm -rf android
           echo '{
             "appId": "com.lumen.biblia",
             "appName": "Lumen Biblia",
-            "webDir": "dist",
+            "webDir": "dist/client",
             "server": { "androidScheme": "https" }
           }' > capacitor.config.json
 
-          # 5. Sincroniza os arquivos
+          # 5. Sincroniza
           npx cap add android
           npx cap sync android
 
-          # 6. Gera o ícone a partir da public
+          # 6. Gera o ícone do App usando seu favicon.ico
+          # O log mostrou que o favicon está em public/
           if [ -f "public/favicon.ico" ]; then
             cp public/favicon.ico icon.png
             npx @capacitor/assets generate --android || true
@@ -60,6 +66,6 @@ jobs:
       - name: Download APK
         uses: actions/upload-artifact@v4
         with:
-          name: lumen-app-bun-total
+          name: lumen-app-total-corrigido
           path: android/app/build/outputs/apk/debug/app-debug.apk
           
