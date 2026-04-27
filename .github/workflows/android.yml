@@ -21,23 +21,22 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Montar App Sem Erro
+      - name: Construir App Limpo
         run: |
           npm install @capacitor/core @capacitor/cli @capacitor/android @capacitor/assets
 
-          # 1. Limpa tudo e cria a pasta fora da raiz de busca
+          # 1. Cria a pasta de build e limpa qualquer erro anterior
           rm -rf android dist
-          mkdir -p ../temp_build
-          
-          # 2. Copia TUDO do GitHub para a pasta temporária externa (evita o loop)
-          # Isso garante que seus 100MB de arquivos entrem no app
-          cp -R . ../temp_build/
-
-          # 3. Move de volta para a pasta que o Capacitor vai ler
           mkdir -p dist/client
-          cp -R ../temp_build/* dist/client/
 
-          # 4. Configura o Capacitor apontando para a pasta com os 100MB
+          # 2. Copia seus 100MB de arquivos (fotos e códigos)
+          # Ele busca em public, src ou na raiz
+          cp index.html dist/client/ || true
+          cp favicon.ico dist/client/ || true
+          cp -r public/* dist/client/ 2>/dev/null || true
+          cp -r src/* dist/client/ 2>/dev/null || true
+
+          # 3. Configuração do App
           echo '{
             "appId": "com.lumen.biblia",
             "appName": "Lumen Biblia",
@@ -45,14 +44,13 @@ jobs:
             "server": { "androidScheme": "https" }
           }' > capacitor.config.json
 
-          # 5. Gera o Android do zero
+          # 4. Gera a pasta android NOVA (isso evita o erro de fechar o app)
           npx cap add android
           npx cap sync android
 
-          # 6. Tenta gerar o ícone a partir do favicon (onde quer que ele esteja)
-          FAVICON=$(find dist/client -name "favicon.ico" | head -n 1)
-          if [ ! -z "$FAVICON" ]; then
-            cp "$FAVICON" icon.png
+          # 5. Gera o ícone do app
+          if [ -f "dist/client/favicon.ico" ]; then
+            cp dist/client/favicon.ico icon.png
             npx @capacitor/assets generate --android || true
           fi
 
@@ -65,6 +63,6 @@ jobs:
       - name: Download APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-lumen-final-mesmo
+          name: lumen-app-final
           path: android/app/build/outputs/apk/debug/app-debug.apk
           
