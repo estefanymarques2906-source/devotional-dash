@@ -21,25 +21,22 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Juntar Tudo e Criar App
+      - name: Juntar 100MB e Criar App
         run: |
           npm install @capacitor/core @capacitor/cli @capacitor/android @capacitor/assets
 
-          # 1. LIMPEZA TOTAL: Remove pastas que causam erro de conflito
-          rm -rf android
-          rm -rf Android
-          rm -rf dist
+          # 1. LIMPEZA TOTAL (Apaga a pasta Android que está travando o app)
+          rm -rf android Android dist
           mkdir -p dist/client
 
-          # 2. COPIA OS ARQUIVOS: Pega seu index.html e seu favicon.ico da raiz
-          # O comando abaixo evita o erro de "copy into itself"
+          # 2. PUXA TUDO (Pega os arquivos de public, src e da raiz)
+          # Isso garante que seus 100MB entrem no pacote
+          cp -r public/* dist/client/ 2>/dev/null || true
+          cp -r src/* dist/client/ 2>/dev/null || true
           cp index.html dist/client/ || true
           cp favicon.ico dist/client/ || true
-          # Se você tiver outras pastas como 'public' ou 'src', copia elas também
-          [ -d "public" ] && cp -r public/* dist/client/ || true
-          [ -d "src" ] && cp -r src/* dist/client/ || true
 
-          # 3. CONFIGURAÇÃO: Aponta o app para a pasta que acabamos de criar
+          # 3. CONFIGURAÇÃO
           echo '{
             "appId": "com.lumen.biblia",
             "appName": "Lumen Biblia",
@@ -47,11 +44,11 @@ jobs:
             "server": { "androidScheme": "https" }
           }' > capacitor.config.json
 
-          # 4. GERA O ANDROID: Cria a plataforma do zero (limpa e sem erros)
+          # 4. GERA O PROJETO ANDROID NOVO
           npx cap add android
           npx cap sync android
 
-          # 5. ÍCONE: Transforma seu favicon.ico no ícone oficial do Android
+          # 5. GERA O ÍCONE DO APP (Usando seu favicon.ico)
           if [ -f "favicon.ico" ]; then
             cp favicon.ico icon.png
             npx @capacitor/assets generate --android || true
@@ -66,6 +63,6 @@ jobs:
       - name: Download APK
         uses: actions/upload-artifact@v4
         with:
-          name: lumen-biblia-final
+          name: lumen-biblia-100mb
           path: android/app/build/outputs/apk/debug/app-debug.apk
           
