@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Pegar arquivos
+      - name: Pegar arquivos do GitHub
         uses: actions/checkout@v4
 
       - name: Configurar Java e Node
@@ -27,18 +27,18 @@ jobs:
           bun install
           bun run build
 
-          # 2. FORÇA a pasta ter o nome que o Capacitor quer
-          # Se o Vite criou 'dist', nós renomeamos para 'dist/client'
+          # 2. RESOLVENDO O ERRO DO LOG: Cria a pasta exata que ele pede
+          # e move o index.html e tudo o mais para dentro dela
           mkdir -p dist/client
           cp -r dist/* dist/client/ 2>/dev/null || true
 
           # 3. Instala o Capacitor
           npm install @capacitor/core @capacitor/cli @capacitor/android @capacitor/assets
 
-          # 4. Limpa qualquer erro de plataforma antiga
+          # 4. LIMPEZA TOTAL para evitar erro de plugin
           rm -rf android
           
-          # 5. Configura o arquivo apontando para onde forçamos os arquivos
+          # 5. CONFIGURAÇÃO: Forçando o webDir para a pasta que o log exige
           echo '{
             "appId": "com.lumen.biblia",
             "appName": "Lumen Biblia",
@@ -46,11 +46,11 @@ jobs:
             "server": { "androidScheme": "https" }
           }' > capacitor.config.json
 
-          # 6. Sincroniza
+          # 6. SINCRONIZAÇÃO
           npx cap add android
           npx cap sync android
 
-          # 7. Gera o ícone do App (favicon.ico que está na public)
+          # 7. ÍCONE: Usa o favicon.ico da public como ícone do app
           if [ -f "public/favicon.ico" ]; then
             cp public/favicon.ico icon.png
             npx @capacitor/assets generate --android || true
@@ -65,6 +65,6 @@ jobs:
       - name: Download APK
         uses: actions/upload-artifact@v4
         with:
-          name: lumen-biblia-definitivo
+          name: lumen-app-completo
           path: android/app/build/outputs/apk/debug/app-debug.apk
           
