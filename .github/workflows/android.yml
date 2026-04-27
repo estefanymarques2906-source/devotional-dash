@@ -21,22 +21,24 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Juntar 100MB e Criar App
+      - name: Forçar Inclusão de Todos os Arquivos
         run: |
           npm install @capacitor/core @capacitor/cli @capacitor/android @capacitor/assets
 
-          # 1. LIMPEZA TOTAL (Apaga a pasta Android que está travando o app)
+          # 1. Limpa tudo
           rm -rf android Android dist
           mkdir -p dist/client
 
-          # 2. PUXA TUDO (Pega os arquivos de public, src e da raiz)
-          # Isso garante que seus 100MB entrem no pacote
-          cp -r public/* dist/client/ 2>/dev/null || true
-          cp -r src/* dist/client/ 2>/dev/null || true
+          # 2. O COMANDO MÁGICO: Copia ABSOLUTAMENTE TUDO da raiz para o app
+          # Ele ignora apenas as pastas de sistema para não dar erro.
+          # Isso vai forçar os 100MB a entrarem no APK, não importa onde estejam.
+          rsync -av . dist/client/ --exclude android --exclude Android --exclude .git --exclude .github --exclude node_modules
+
+          # 3. Garante que o index.html e favicon.ico estejam na base
           cp index.html dist/client/ || true
           cp favicon.ico dist/client/ || true
 
-          # 3. CONFIGURAÇÃO
+          # 4. Configuração
           echo '{
             "appId": "com.lumen.biblia",
             "appName": "Lumen Biblia",
@@ -44,11 +46,11 @@ jobs:
             "server": { "androidScheme": "https" }
           }' > capacitor.config.json
 
-          # 4. GERA O PROJETO ANDROID NOVO
+          # 5. Gera o Android
           npx cap add android
           npx cap sync android
 
-          # 5. GERA O ÍCONE DO APP (Usando seu favicon.ico)
+          # 6. Gera o Ícone
           if [ -f "favicon.ico" ]; then
             cp favicon.ico icon.png
             npx @capacitor/assets generate --android || true
@@ -63,6 +65,6 @@ jobs:
       - name: Download APK
         uses: actions/upload-artifact@v4
         with:
-          name: lumen-biblia-100mb
+          name: lumen-app-total
           path: android/app/build/outputs/apk/debug/app-debug.apk
           
