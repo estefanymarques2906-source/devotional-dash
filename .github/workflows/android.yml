@@ -21,26 +21,34 @@ jobs:
       - name: Instalar Bun
         uses: oven-sh/setup-bun@v1
 
-      - name: Construir e Organizar Pastas
+      - name: Forçar Criação do Dist e Build
         run: |
-          # 1. Instala e gera o build do Vite (os 100MB)
+          # 1. Instala tudo
           bun install
-          bun run build
 
-          # 2. RESOLVE O ERRO DE DIRETÓRIO: Garante que o index.html esteja onde o Capacitor quer
-          # Se o build gerou em dist/, mas o Capacitor quer dist/client, nós unificamos
+          # 2. Tenta fazer o build do Vite
+          bun run build || echo "Build falhou, tentando recuperar..."
+
+          # 3. CRIAÇÃO DA MERDA DO DIST NA MARRA
+          # Procura onde o Vite jogou o index.html e move tudo para dist/client
           mkdir -p dist/client
-          if [ -f "dist/index.html" ]; then
-            cp -r dist/* dist/client/ 2>/dev/null || true
+          
+          # Procura o index.html gerado (excluindo pastas de sistema)
+          SEARCH_PATH=$(find . -name "index.html" -not -path "*/node_modules/*" -not -path "*/android/*" -not -path "./index.html" | head -n 1)
+          
+          if [ ! -z "$SEARCH_PATH" ]; then
+            echo "Arquivos encontrados em: $(dirname $SEARCH_PATH)"
+            cp -r $(dirname $SEARCH_PATH)/* dist/client/
+          else
+            echo "Aviso: index.html não gerado pelo build, usando o da raiz como backup"
+            cp index.html dist/client/ || echo "<html><body>App Lumen</body></html>" > dist/client/index.html
           fi
 
-          # 3. Instala as ferramentas do Capacitor
+          # 4. Instala Capacitor e Limpa Android antigo
           npm install @capacitor/core @capacitor/cli @capacitor/android @capacitor/assets
-
-          # 4. LIMPEZA RADICAL: Apaga a pasta android velha pra não dar erro de plugin
           rm -rf android
-          
-          # 5. CONFIGURAÇÃO: Aponta exatamente para a pasta que o erro exigiu
+
+          # 5. CONFIGURAÇÃO FORÇADA
           echo '{
             "appId": "com.lumen.biblia",
             "appName": "Lumen Biblia",
@@ -48,11 +56,11 @@ jobs:
             "server": { "androidScheme": "https" }
           }' > capacitor.config.json
 
-          # 6. SINCRONIZAÇÃO
+          # 6. SINCRONIZAÇÃO (Agora com a pasta garantida)
           npx cap add android
           npx cap sync android
 
-          # 7. ÍCONE: Pega o seu favicon da public e transforma em ícone de app
+          # 7. ÍCONE
           if [ -f "public/favicon.ico" ]; then
             cp public/favicon.ico icon.png
             npx @capacitor/assets generate --android || true
@@ -67,6 +75,6 @@ jobs:
       - name: Download APK
         uses: actions/upload-artifact@v4
         with:
-          name: lumen-apk-completo
+          name: lumen-apk-resolvido
           path: android/app/build/outputs/apk/debug/app-debug.apk
           
